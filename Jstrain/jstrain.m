@@ -1,13 +1,18 @@
 function [ runOK ] = jstrain(infile,outfile)
 %JSTRAIN calculates and plots J-index as a function of strain
-%   Detailed explanation goes here
+%   An input VPSC file is take as input. The J index is then calculated for
+%   each timestep available in the file. Finally the J index is then
+%   plotted agains the strain as found in the VPSC file.
 
 % set up MTEX package
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/mtex-4.1.3/
 startup_mtex
 
+% add path to read files
+addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles
+
 % Read whole data file
-[textures,ngrains,blocks] = MVT_read_VPSC_file(infile);
+[textures,ngrains,blocks] = read_VPSC(infile);
 
 % Set up symmetry
 CS = crystalSymmetry('Pbnm', [4.75, 10.20, 5.98]);
