@@ -89,7 +89,7 @@ function [eulers, ngrains,blocks] = MVT_read_VPSC_file(filename)
         if blocks == 1
             eulers = tmp_eulers;
             nxtl = tmp_nxtl;
-            ngrains = tmp_nextl; 
+            ngrains = tmp_nxtl; 
         elseif blocks == 2
             % Multiple textures, bundle into a cell array...
             eulers = {eulers};
