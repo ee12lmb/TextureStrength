@@ -46,7 +46,7 @@
 % OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
 % SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-function [eulers, nxtl,blocks] = MVT_read_VPSC_file(filename)
+function [eulers, ngrains,blocks] = MVT_read_VPSC_file(filename)
     % Reads data from a VPSC output or input texture file.
     % Must be Bunge convention and in degrees. Returns eulers, a (3,nxtl) 
     % array of Euler angles (Bunge convention, (1,:) = phi1, (2,:) = Phi
@@ -59,6 +59,12 @@ function [eulers, nxtl,blocks] = MVT_read_VPSC_file(filename)
     blocks = 0; % Which number texture block are we on?
     % Read the first header line (of this texture block). If this 
     % returns -1 we are at the end of the file, which is OK.
+    
+    % initialise counter for strain vector
+    %i = 1 ;
+    %header = sscanf(fgetl(fid), '%s %d') ;
+    %strain(i) = header(2)
+    
     while (fgetl(fid) ~= -1) % Header line - ignore
         fgetl(fid); % Lengths of phase ellipsoid axes - ignore
         fgetl(fid); % Euler angles for phase ellipsoid - ignore
@@ -83,6 +89,7 @@ function [eulers, nxtl,blocks] = MVT_read_VPSC_file(filename)
         if blocks == 1
             eulers = tmp_eulers;
             nxtl = tmp_nxtl;
+            ngrains = tmp_nextl; 
         elseif blocks == 2
             % Multiple textures, bundle into a cell array...
             eulers = {eulers};
