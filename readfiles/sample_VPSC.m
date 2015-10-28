@@ -40,7 +40,7 @@ if (blocks == 1)
     
 else % more than one time step requires cell array
     
-    for i = 1:blocks-1
+    for i = 1:blocks
         
         tmp_eulers = textures{i};
         
