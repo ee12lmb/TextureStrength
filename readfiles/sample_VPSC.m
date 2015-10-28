@@ -1,7 +1,9 @@
-function [sample_texture,ngrains,blocks] = sample_VPSC(infile,n,seed)
+function [sample_texture,ngrains,strain,blocks] = sample_VPSC(infile,n,seed)
 % SAMPLE_VPSC randomly samples from an input VPSC file
 %   Randomly pulls n samples from the VPSC input file. Seed ensures
 %   repeatability (i.e. the same samples will be extracted)
+%
+%   Returns the same format as read_VPSC
 
 
 %% Read VPSC & set up sample index
@@ -10,7 +12,11 @@ function [sample_texture,ngrains,blocks] = sample_VPSC(infile,n,seed)
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles/
 
 % Read whole data file
-[textures,ngrains,blocks] = MVT_read_VPSC_file(infile);
+[textures,nxtl,strain,blocks] = read_VPSC(infile);
+
+% check that nxtl is same for all time steps, and assign one scalar
+assert((range(nxtl) == 0),'Number of grains not consitent across time steps!')
+ngrains = nxtl(1);
 
 % check that n is not greater than number of grains in sample
 assert((n <= ngrains), ...
