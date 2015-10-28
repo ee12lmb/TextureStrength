@@ -33,7 +33,7 @@
 % 
 % THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS 
 % AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED 
-% WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+% WARRANvTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
 % WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A 
 % PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL 
 % THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY 
@@ -46,7 +46,7 @@
 % OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
 % SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-function [eulers, ngrains,blocks] = MVT_read_VPSC_file(filename)
+function [eulers,nxtl,strain,blocks] = readVPSC(filename)
     % Reads data from a VPSC output or input texture file.
     % Must be Bunge convention and in degrees. Returns eulers, a (3,nxtl) 
     % array of Euler angles (Bunge convention, (1,:) = phi1, (2,:) = Phi
@@ -57,15 +57,17 @@ function [eulers, ngrains,blocks] = MVT_read_VPSC_file(filename)
     fid = fopen(filename); % Read - the default
     
     blocks = 0; % Which number texture block are we on?
-    % Read the first header line (of this texture block). If this 
-    % returns -1 we are at the end of the file, which is OK.
     
-    % initialise counter for strain vector
-    %i = 1 ;
-    %header = sscanf(fgetl(fid), '%s %d') ;
-    %strain(i) = header(2)
-    
-    while (fgetl(fid) ~= -1) % Header line - ignore
+    while (true) % infinite loop (break with conditional)
+        
+        % get strain header info
+        tmp_l = fgetl(fid);
+        if (tmp_l == -1)     % if no more lines then break loop 
+            break 
+        end
+        
+        tmp_header = sscanf(tmp_l, '%s %s %s %s %g');
+        
         fgetl(fid); % Lengths of phase ellipsoid axes - ignore
         fgetl(fid); % Euler angles for phase ellipsoid - ignore
         L = sscanf(fgetl(fid), '%s %d'); % Convention and number of crystals
@@ -88,19 +90,20 @@ function [eulers, ngrains,blocks] = MVT_read_VPSC_file(filename)
         blocks = blocks + 1;
         if blocks == 1
             eulers = tmp_eulers;
-            nxtl = tmp_nxtl;
-            ngrains = tmp_nxtl; 
+            nxtl(blocks) = tmp_nxtl;
+            strain(blocks) = tmp_header(17);
         elseif blocks == 2
             % Multiple textures, bundle into a cell array...
             eulers = {eulers};
-            nxtl = {nxtl};
             eulers(2) = {tmp_eulers};
-            nxtl(2) = {nxtl};
+            nxtl(blocks) = tmp_nxtl;
+            strain(blocks) = tmp_header(17);
         else
             eulers(blocks) = {tmp_eulers};
-            nxtl(blocks) = {tmp_nxtl};
+            nxtl(blocks) = tmp_nxtl;
+            strain(blocks) = tmp_header(17);
         end
-        
+            
         % Put the current file position in a sensible place.
         % This is yucky.
         frewind(fid);
@@ -113,6 +116,7 @@ function [eulers, ngrains,blocks] = MVT_read_VPSC_file(filename)
                 fgetl(fid);
             end
         end
+        
     end
     fclose(fid);
    
