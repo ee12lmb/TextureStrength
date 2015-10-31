@@ -1,15 +1,14 @@
 % MVT_read_VPSC_file - Read euler angles from a VPSC texture file 
 %
 % Given the name of a VPSC formatted texture file, return an array 
-% of Euler angles and the number of crystals in the file. If only one 
-% texture exists in the file return Matlab arrays for eulers and nxtl.
-% If multiple textures exists return cell arrays (where the indicies 
-% map to each texture.
+% of Euler angles, the number of crystals, strain at each time step and 
+% number of timesteps present in the file. If only one texture exists in 
+% the file return Matlab arrays for eulers and nxtl. If multiple textures 
+% exists return cell array of Eulers (where the indicies map to each 
+% texture).
 % 
 % Usage: 
-%     [eulers, nxtl,strain,blocks] = MVT_read_VPSC_file(filename)
-%
-% See also: MVT_write_VPSC_file
+%     [eulers, nxtl, strain, blocks] = read_VPSC(filename)
 
 
 % Copyright (c) 2012, Andrew Walker
@@ -59,13 +58,14 @@ function [eulers,nxtl,strain,blocks] = read_VPSC(filename)
     blocks = 0; % Which number texture block are we on?
     
     while (true) % infinite loop (break with conditional)
-        tic;
+        %tic;
         % get strain header info
         tmp_l = fgetl(fid);
-        if (tmp_l == -1)     % if no more lines then break loop 
-            break 
+        if (tmp_l == -1)     % if no strain info then we are at the end 
+            break            % of the file, break out of read loop
         end
         
+        % pull out strain from header line
         tmp_header = sscanf(tmp_l, '%s %s %s %s %g');
         
         fgetl(fid); % Lengths of phase ellipsoid axes - ignore
@@ -76,18 +76,17 @@ function [eulers,nxtl,strain,blocks] = read_VPSC(filename)
         assert((char(L(1))=='B'), ... % Check Euler angle convention
             'Could not read VPSC file - not Bunge format\n');
         tmp_nxtl = L(2); % Number of crystals
-
-        % Read this set of Euler angles...
-        %E = fscanf(fid, '%g %g %g %g', [4 tmp_nxtl]);
         
         % intialise tempary Euler angle array
         tmp_eulers = zeros(3,tmp_nxtl);
         
         % loop over each grain and extract Eulers
         for i = 1:tmp_nxtl
+            
+            % scan in info for this grain
             E = sscanf(fgetl(fid),'%g %g %g %g');
         
-            % Build Euler angles array.
+            % Build Euler angles array
             tmp_eulers(1,i) = E(1,:);
             tmp_eulers(2,i) = E(2,:);
             tmp_eulers(3,i) = E(3,:);
@@ -110,7 +109,7 @@ function [eulers,nxtl,strain,blocks] = read_VPSC(filename)
             nxtl(blocks) = tmp_nxtl;
             strain(blocks) = tmp_header(17);
         end
-        toc
+        %toc
     end
     fclose(fid);
    
