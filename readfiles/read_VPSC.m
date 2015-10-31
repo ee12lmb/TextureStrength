@@ -7,7 +7,7 @@
 % map to each texture.
 % 
 % Usage: 
-%     [eulers, nxtl] = MVT_read_VPSC_file(filename)
+%     [eulers, nxtl,strain,blocks] = MVT_read_VPSC_file(filename)
 %
 % See also: MVT_write_VPSC_file
 
@@ -46,7 +46,7 @@
 % OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
 % SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-function [eulers,nxtl,strain,blocks] = readVPSC(filename)
+function [eulers,nxtl,strain,blocks] = read_VPSC(filename)
     % Reads data from a VPSC output or input texture file.
     % Must be Bunge convention and in degrees. Returns eulers, a (3,nxtl) 
     % array of Euler angles (Bunge convention, (1,:) = phi1, (2,:) = Phi
@@ -59,7 +59,7 @@ function [eulers,nxtl,strain,blocks] = readVPSC(filename)
     blocks = 0; % Which number texture block are we on?
     
     while (true) % infinite loop (break with conditional)
-        
+        tic;
         % get strain header info
         tmp_l = fgetl(fid);
         if (tmp_l == -1)     % if no more lines then break loop 
@@ -78,13 +78,20 @@ function [eulers,nxtl,strain,blocks] = readVPSC(filename)
         tmp_nxtl = L(2); % Number of crystals
 
         % Read this set of Euler angles...
-        E = fscanf(fid, '%g %g %g %g', [4 tmp_nxtl]);
-    
-        % Build Euler angles array.
+        %E = fscanf(fid, '%g %g %g %g', [4 tmp_nxtl]);
+        
+        % intialise tempary Euler angle array
         tmp_eulers = zeros(3,tmp_nxtl);
-        tmp_eulers(1,:) = E(1,:);
-        tmp_eulers(2,:) = E(2,:);
-        tmp_eulers(3,:) = E(3,:);
+        
+        % loop over each grain and extract Eulers
+        for i = 1:tmp_nxtl
+            E = sscanf(fgetl(fid),'%g %g %g %g');
+        
+            % Build Euler angles array.
+            tmp_eulers(1,i) = E(1,:);
+            tmp_eulers(2,i) = E(2,:);
+            tmp_eulers(3,i) = E(3,:);
+        end
         
         % Bulild output...
         blocks = blocks + 1;
@@ -103,20 +110,7 @@ function [eulers,nxtl,strain,blocks] = readVPSC(filename)
             nxtl(blocks) = tmp_nxtl;
             strain(blocks) = tmp_header(17);
         end
-            
-        % Put the current file position in a sensible place.
-        % This is yucky.
-        frewind(fid);
-        for i = 1:blocks
-            fgetl(fid);
-            fgetl(fid);
-            fgetl(fid);
-            fgetl(fid);
-            for j = 1:tmp_nxtl % do we need to handle changing the number of xtals?
-                fgetl(fid);
-            end
-        end
-        
+        toc
     end
     fclose(fid);
    
