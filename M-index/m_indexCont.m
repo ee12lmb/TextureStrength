@@ -1,16 +1,25 @@
-function [ m, strain, MDF_density, MDF_angles, uniform_density, uniform_angles ] ...
-         = m_index(input_texture,n,seed)
-%M_INDEX returns m index for an input texture file (Bunge format).
-%   Detailed explanation goes here
+function [ m, strain ] = m_indexCont(input_texture,n,seed)
+%M_INDEX returns m index and strain vector for an input texture 
+%   Takes either a VPSC file path or a cell array/matrix of a texture that
+%   has already been read in (see read_VPSC).
+%
+%   Inputs:  input_texture - file path/texture array/texture matrix 
+%            n             - number of samples to pull from texture
+%            seed          - allows repeatability, i.e. generates the same
+%                            'random' samples if set equal to previous run
+%
+%   Outputs: m             - the M-index as calculated by the continuous
+%                            function method outlined in Mainprice (REF)
+%            strain        - strain vector if input is file path (otherwise
+%                            this is known before function call)
+%
+%   Usage: [ m, strain ] = m_indexCont(input_texture,n,seed)
 
 %% Setup & read data
 
-% set up MTEX package
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/mtex-4.1.3/
+% set up MTEX package & source all functions
+addpath /nfs/see-fs-01_teaching/ee12lmb/project/source
 startup_mtex;
-
-% add path to read files
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles/
 
 % check if input is raw VPSC or texture array
 if (ischar(input_texture) == 1)
@@ -43,44 +52,23 @@ uniform_density_N = uniform_density/sum(uniform_density); % normalise
 % array or just normal matrix)
 if (blocks == 1)
   
-    eulers_r = textures*degree; % textures is SAMPLED TEXTURE
-
-    % calculate M-index for this block and store
-    g = orientation('Euler', eulers_r(1,:), eulers_r(2,:), eulers_r(3,:), ...
-        CS, SS, 'Bunge');
-    odf = calcODF(g,'HALFWIDTH', 10*degree, 'silent');
-    
-    % calculate MDF
-    MDF = calcMDF(odf);
-    
-    % find density and normalise
-    [MDF_density,MDF_angles] = calcAngleDistribution(MDF,'resolution',1*degree);
-    MDF_density_N = MDF_density/sum(MDF_density);
+    % call function to retrive relevant MDF info
+    [~, MDFdensity,~] = textureMDF(textures);
+    MDF_density = MDFdensity/sum(MDFdensity); % normalise
     
     % calculate M-index
-    m = (sum((abs(uniform_density_N - MDF_density_N))/2));
+    m = (sum((abs(uniform_density_N - MDF_density))/2));
     
 else % now deal with multiple timesteps (e.g. cell arrays)
     
-    % pull out samples for each time step
-    for i = 1:blocks % deal with repeated texture
-
-        eulers_r = textures{i}*degree; % textures is SAMPLED TEXTURE
-
-        % calculate M-index for this block and store
-        g = orientation('Euler', eulers_r(1,:), eulers_r(2,:), eulers_r(3,:), ...
-            CS, SS, 'Bunge');
-        odf = calcODF(g,'HALFWIDTH', 10*degree, 'silent');
-       
-        % calculate MDF
-        MDF = calcMDF(odf);
-    
-        % find density and normalise
-        [MDF_density{i},MDF_angles{i}] = calcAngleDistribution(MDF,'resolution',1*degree);
-        MDF_density_N = MDF_density{i}/sum(MDF_density{i});
+    for i = 1:blocks
+        
+        % call function to retrive relevant MDF info
+        [~, MDFdensity,~] = textureMDF(textures{i});
+        MDF_density = MDFdensity/sum(MDFdensity); % normalise
     
         % calculate M-index
-        m(i) = (sum((abs(uniform_density_N - MDF_density_N))/2));
+        m(i) = (sum((abs(uniform_density_N - MDF_density))/2));
 
     end
     
