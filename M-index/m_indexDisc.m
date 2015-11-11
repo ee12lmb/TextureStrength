@@ -55,49 +55,6 @@ SS = specimenSymmetry('-1');
 % ** THIS WOULD BE USEFUL TO MODULARISE **
 % e.g function discreteMDF
 
-if (blocks == 1) % if texture only has one timestep
-    
-    eulers_r = textures*degree;
-    
-    % calculate 3x3 orientation matrix for each grain
-    for i = 1:n 
-        
-        % separate out angles for ease
-        phi1 = eulers_r(1,i);
-        Phi  = eulers_r(2,i);
-        phi2 = eulers_r(3,i);
-        
-        % calculate elements of orientation matrix for this grain
-        % could make this more efficient by calculating common trig
-        % multiplications?
-        
-        g_tmp(1,1) = cos(phi1) * cos(phi2) - sin(phi1) * sin(phi2) * cos(Phi);
-        g_tmp(1,2) = sin(phi1) * cos(phi2) + cos(phi1) * sin(phi2) * cos(Phi);        
-        g_tmp(1,3) = sin(phi2) * sin(Phi);        
-        g_tmp(2,1) = -cos(phi1) * sin(phi2) - sin(phi1) * cos(phi2) * cos(Phi);        
-        g_tmp(2,2) = -sin(phi1) * sin(phi2) + cos(phi1) * cos(phi2) * cos(Phi);        
-        g_tmp(2,3) = cos(phi2) * sin(Phi);        
-        g_tmp(3,1) = sin(phi1) * sin(Phi);        
-        g_tmp(3,2) = -cos(phi1) * sin(Phi);        
-        g_tmp(3,3) = cos(Phi);
-        
-        g{i} = g_tmp; % store each orientation matrix in cell a cell in g
-        
-    end
-    
-    % find misorientation angles for all grains
-    Nangles = 1 % initialise counter for angles
-    
-    for i = 1:n % loop over all grains
-        for j = i+1:n % compare ith grain with all others after it
-            
-            % calculate misorientation matrix between two grains
-            M_tmp = inv(g{i}) * g{j};
-    
-            % extract angle 
-            theta(Nangles) = acos(((M_tmp(1,1) + M_tmp(2,2) + M_tmp(3,3) - 1)/2));
-    
-    
     
 end
 
