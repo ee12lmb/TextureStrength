@@ -1,4 +1,4 @@
-function [sample_texture,blocks] = sample_texture(textures,n,seed)
+function [sample_texture,blocks,ngrains] = sample_texture(textures,n,seed)
 %SAMPLE_TEXTURE randomly samples from a texutre imported by read_VPSC
 %   Function allows sampling without the need to read a texture in again.
 %   To repeat a sample, specify the same seed as previously ran.
