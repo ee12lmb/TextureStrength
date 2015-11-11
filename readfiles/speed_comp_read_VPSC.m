@@ -37,7 +37,7 @@ subplot(1,2,2)
 plot(nblocks,cumulOld,'bo')
 hold on 
 plot(nblocks,cumulNew,'ro')
-title('Cululative time taken for each timestep (10,000 grains)')
+title('Cumulative time taken for each timestep (10,000 grains)')
 xlabel('Timestep')
 ylabel('Cumulative time (s)')
 legend('fscanf','fgetl and sscanf','Location','northwest')

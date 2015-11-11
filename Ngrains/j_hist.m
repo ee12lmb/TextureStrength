@@ -42,7 +42,7 @@ if (iscell(textures) == 1) % do we have multiple textures (e.g. cell array)
         J(i) = J_ngrains(textures{timestep},n,seed);
 
         % update seed for next run
-        seed = seed + runs;
+        seed = seed + runs; % is this random enough?
 
     end
 else
@@ -53,7 +53,7 @@ else
     J(i) = J_ngrains(textures,n,seed);
 
     % update seed for next run
-    seed = seed + runs;
+    seed = seed + runs; % is this random enough?
 
     end
     

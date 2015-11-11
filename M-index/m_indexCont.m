@@ -1,5 +1,5 @@
 function [ m, strain ] = m_indexCont(input_texture,n,seed)
-%M_INDEX returns m index and strain vector for an input texture 
+%M_INDEXCONT returns m index and strain vector for an input texture 
 %   Takes either a VPSC file path or a cell array/matrix of a texture that
 %   has already been read in (see read_VPSC).
 %
@@ -17,9 +17,12 @@ function [ m, strain ] = m_indexCont(input_texture,n,seed)
 
 %% Setup & read data
 
-% set up MTEX package & source all functions
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source
+% set up MTEX package
+addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/mtex-4.1.3/
 startup_mtex;
+
+% add path to read files
+addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles/
 
 % check if input is raw VPSC or texture array
 if (ischar(input_texture) == 1)
@@ -53,7 +56,7 @@ uniform_density_N = uniform_density/sum(uniform_density); % normalise
 if (blocks == 1)
   
     % call function to retrive relevant MDF info
-    [~, MDFdensity,~] = textureMDF(textures);
+    [~, MDFdensity,~] = continuousMDF(textures,CS,SS);
     MDF_density = MDFdensity/sum(MDFdensity); % normalise
     
     % calculate M-index
@@ -64,7 +67,7 @@ else % now deal with multiple timesteps (e.g. cell arrays)
     for i = 1:blocks
         
         % call function to retrive relevant MDF info
-        [~, MDFdensity,~] = textureMDF(textures{i});
+        [~, MDFdensity,~] = continuousMDF(textures{i},CS,SS);
         MDF_density = MDFdensity/sum(MDFdensity); % normalise
     
         % calculate M-index

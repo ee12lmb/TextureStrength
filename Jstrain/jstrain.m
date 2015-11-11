@@ -19,7 +19,7 @@ CS = crystalSymmetry('Pbnm', [4.75, 10.20, 5.98]);
 SS = specimenSymmetry('-1');
 
 % loop to calculate J for each 'block'/timestep
-for i = 1:blocks-1
+for i = 1:blocks-1 % deal with repeated texture
     
     % extract euler angles and turn to radians
     eulers_r = textures{i}*degree;

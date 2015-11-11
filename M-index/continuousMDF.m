@@ -1,4 +1,4 @@
-function [ MDF, density, angles] = textureMDF(input_texture,CS,SS)
+function [ MDF, density, angles] = continuousMDF(input_texture,CS,SS)
 %textureMDF returns the MDF, the angles, and angle desnsities for an input
 %texture
 %   If input texture has more than one timestep (i.e. requires cell array),
@@ -17,9 +17,12 @@ function [ MDF, density, angles] = textureMDF(input_texture,CS,SS)
 %
 
 
-% set up MTEX package & source all functions
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source
+% set up MTEX package
+addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/mtex-4.1.3/
 startup_mtex;
+
+% add path to read files
+addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles/
 
 
 %% Input checks

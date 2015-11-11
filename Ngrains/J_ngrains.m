@@ -50,7 +50,7 @@ if (blocks == 1)
     J = textureindex(odf);  
     
     
-else % now deal with multiple textures (e.g. cell arrays)
+else % now deal with multiple timesteps (e.g. cell arrays)
     
     % pull out samples for each time step
     for i = 1:blocks % deal with repeated texture
