@@ -60,64 +60,43 @@ figure(1)
 bar(uniform_angles,uniform_density,'histc')
 
 % calculate bin dimensions (here set to one degree - *could take input?*)
-bins = linspace(0,theta_max,theta_max+1)
+bins = linspace(0,theta_max,theta_max+1);
 
 % calcAngleDistribution returns angles and densities as a fraction of 300
 % (not sure why, seems arbitrary). To solve, need to sum up density in the
 % bins that we have defined
 
-uniform_freq = zeros(length(bins),1);  % intialise freq sum for all bins
-min_bin = 1;                           % initialise minimum bin counter
+% find number of angles returned from calcAngleDist in our defined bins
+Nangles_in_bins = histc(uniform_angles,bins);
 
-for j = 1:length(uniform_angles) % loop over all angles
+% intialise freq sum for all bins
+uniform_freq = zeros(1,length(bins));  
+
+%uniform_density = uniform_density*(1/300);
+
+
+j = 1; % initialise loop counter
+for i = 1:length(bins) % now loop through and sum relevant densities into each bin
     
-    % if a bin has been passed, we will never find an angle lower than this
-    % i.e. the return from calcAngleDistribution in monotonically
-    % increasing
-    
-    for i = min_bin:length(bins)-1 % check over all bins
+    for null = 1:Nangles_in_bins(i) % sum up correct indicies for this bin
 
-        % bin in the same way has histc (see 'help histc')
-        if ((bins(i) <= uniform_angles(j)) && (uniform_angles(j) < bins(i+1))) 
+        uniform_freq(i) = uniform_freq(i) + uniform_density(j);
 
-            disp('************************')
-            disp('Checking if statement')
-            bins(i)
-            bins(i+1)
-            uniform_angles(j)
+        % increase counter
+        j = j +1;
+        
+    end 
+    uniform_freq(i) = uniform_freq(i)/Nangles_in_bins(i);
+end % end bin loop
 
-            
-            % increase density count for this bin
-            disp('input frequency')
-            uniform_freq(i)
-            disp('desity to add')
-            uniform_density(j)
-            uniform_freq(i) = uniform_freq(i) + uniform_density(j);
-            disp('output frequency')
-            uniform_freq(i)
-            disp('************************')
-            
-            %min_bin = min_bin + 1;
-            
-            break % move on to next angle (don't loop through rest of bins) 
-            
-        elseif (uniform_angles(j) == bins(i+1)) % deal with final bin
-            
-            % histc will include anything equal to final value in final bin
-            uniform_freq(i+1) = uniform_freq(i+1) + uniform_density(j);
-            
-        end
-    end
-end
-% 
+% normalise freq
+uniform_freq = uniform_freq/sum(uniform_freq);
+
 figure(2)
-%  uniform_freq
-%  length(uniform_freq)
-%  sum(uniform_freq)
-sum(uniform_density)
 bar(bins,uniform_freq,'histc')
-m = uniform_freq;
-%% Calculate and bin misorientation angles
+
+
+%% Calculate and bin misorientation angles from input texture
 
 % find misorientation angle distribution
 [ disorentation, ~ ] = discreteMDF(textures,CS);
@@ -131,6 +110,15 @@ disor_freq = histc(disorentation,bins);
 
 % normalise 
 disor_freq = disor_freq/sum(disor_freq);
+
+figure(3)
+bar(bins,disor_freq,'histc')
+
+
+
+%% Calculate M-index
+
+m = sum((abs(uniform_freq - disor_freq))/2);
 
 
 
