@@ -4,12 +4,8 @@ function [ runOK ] = jstrain(infile,outfile)
 %   each timestep available in the file. Finally the J index is then
 %   plotted agains the strain as found in the VPSC file.
 
-% set up MTEX package
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/mtex-4.1.3/
-startup_mtex
-
-% add path to read files
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles
+addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
+setup_env
 
 % Read whole data file
 [textures,ngrains,blocks] = read_VPSC(infile);

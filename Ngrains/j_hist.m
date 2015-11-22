@@ -5,8 +5,8 @@ function [ J ] = j_hist(input_texture,timestep,n,runs,seed)
 
 %% Setup & read in data
 
-% add path to read files
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles/
+addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
+setup_env
 
 % if input_texture is file path, read in  
 if (ischar(input_texture) == 1) 

@@ -16,13 +16,8 @@ function [ MDF, density, angles] = continuousMDF(input_texture,CS,SS)
 %   Usage: [ MDF, density, angles ] = textureMDF(input_texture,CS,SS)
 %
 
-
-% set up MTEX package
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/mtex-4.1.3/
-startup_mtex;
-
-% add path to read files
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles/
+addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
+setup_env
 
 
 %% Input checks

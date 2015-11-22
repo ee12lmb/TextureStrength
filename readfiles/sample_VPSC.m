@@ -8,8 +8,11 @@ function [sample_texture,ngrains,strain,blocks] = sample_VPSC(infile,n,seed)
 
 %% Read VPSC & set up sample index
 
-% add path to read files
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles/
+% % add path to read files
+% addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles/
+
+addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
+setup_env
 
 % Read whole data file
 [textures,nxtl,strain,blocks] = read_VPSC(infile);

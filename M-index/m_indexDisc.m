@@ -16,16 +16,21 @@ function [ m,strain ] = m_indexDisc(input_texture,CS,n,seed)
 %
 %   Usage: [ m, strain ] = m_indexDisc(input_texture,n,seed)
 
-
+tic;
 
 %% Setup & read data
 
-% set up MTEX package
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/mtex-4.1.3/
-startup_mtex;
+% % set up MTEX package
+% addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/mtex-4.1.3/
+% startup_mtex;
+% 
+% % add path to read files
+% addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles/
 
-% add path to read files
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles/
+
+addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
+setup_env
+
 
 % check if input is raw VPSC or texture array
 if (ischar(input_texture) == 1)
@@ -44,6 +49,7 @@ else
  
 end
 
+
 %% Calculate and bin theoretical random dist
 
 % find theoretic distribution density
@@ -55,9 +61,6 @@ theta_max = uniform_angles(length(uniform_angles));
 % turn to degrees
 theta_max = theta_max/degree;
 uniform_angles = uniform_angles/degree;
-
-figure(1)
-bar(uniform_angles,uniform_density,'histc')
 
 % calculate bin dimensions (here set to one degree - *could take input?*)
 bins = linspace(0,theta_max,theta_max+1);
@@ -72,55 +75,72 @@ Nangles_in_bins = histc(uniform_angles,bins);
 % intialise freq sum for all bins
 uniform_freq = zeros(1,length(bins));  
 
-%uniform_density = uniform_density*(1/300);
-
 
 j = 1; % initialise loop counter
 for i = 1:length(bins) % now loop through and sum relevant densities into each bin
-    
-    for null = 1:Nangles_in_bins(i) % sum up correct indicies for this bin
 
+    for null = 1:Nangles_in_bins(i) % sum up correct indicies for this bin
+        
+        % e.g. if three angles lie in this bin, loop three times and sum
         uniform_freq(i) = uniform_freq(i) + uniform_density(j);
 
         % increase counter
         j = j +1;
-        
+
     end 
+    
+    % have increased height for this bin, now deal with increased bin width
     uniform_freq(i) = uniform_freq(i)/Nangles_in_bins(i);
+    
 end % end bin loop
 
 % normalise freq
 uniform_freq = uniform_freq/sum(uniform_freq);
 
-figure(2)
-bar(bins,uniform_freq,'histc')
 
+%% Calculate and bin misorientation angles for each input texture
 
-%% Calculate and bin misorientation angles from input texture
+if (blocks == 1)
+    
+    % find misorientation angle distribution
+    [ disorentation, ~ ] = discreteMDF(textures,CS);
 
-% find misorientation angle distribution
-[ disorentation, ~ ] = discreteMDF(textures,CS);
+    % turn angle to degrees
+    disorentation = disorentation/degree;
+    theta_max = theta_max/degree;
 
-% turn angle to degrees
-disorentation = disorentation/degree;
-theta_max = theta_max/degree;
+    % bin angles
+    disor_freq = histc(disorentation,bins);
 
-% bin angles
-disor_freq = histc(disorentation,bins);
+    % normalise 
+    disor_freq = disor_freq/sum(disor_freq);
 
-% normalise 
-disor_freq = disor_freq/sum(disor_freq);
+    %% Calculate M-index
+    m = sum((abs(uniform_freq - disor_freq))/2);
+    
+else
 
-figure(3)
-bar(bins,disor_freq,'histc')
+    for i = 1:blocks 
 
+        % find misorientation angle distribution
+        [ disorentation, ~ ] = discreteMDF(textures{i},CS);
 
+        % turn angle to degrees
+        disorentation = disorentation/degree;
+        theta_max = theta_max/degree;
 
-%% Calculate M-index
+        % bin angles
+        disor_freq = histc(disorentation,bins);
 
-m = sum((abs(uniform_freq - disor_freq))/2);
+        % normalise 
+        disor_freq = disor_freq/sum(disor_freq);
 
+        %% Calculate M-index
+        m(i) = sum((abs(uniform_freq - disor_freq))/2);
 
+    end
 
+end
+toc
 end
 

@@ -12,16 +12,18 @@ function [ theta, M, theta_max ] = discreteMDF(input_texture,CS)
 %            M             - misorientation matricies for all grains 
 %            theta_max     - max theoretical angle for this symmetry 
 %
-%   Usage: [ theta, misor ] = discreteMDF(input_texture,CS)
+%   Usage: [ theta, misor, theta_max ] = discreteMDF(input_texture,CS)
 
 
-% set up MTEX package
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/mtex-4.1.3/
-startup_mtex;
+% % set up MTEX package
+% addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/mtex-4.1.3/
+% startup_mtex;
+% 
+% % add path to read files
+% addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles/
 
-% add path to read files
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles/
-
+addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
+setup_env
 
 %% Input checks
 
@@ -74,7 +76,7 @@ if (blocks == 1) % if texture only has one timestep
     
     % calculate 3x3 orientation matrix for each grain
     for i = 1:ngrains 
-        
+        i
         % separate out angles for ease
         phi1 = eulers_r(1,i);
         Phi  = eulers_r(2,i);
@@ -133,7 +135,7 @@ else % now deal with multiple textures (e.g. cell array)
     
         % calculate 3x3 orientation matrix for each grain
         for i = 1:ngrains 
-
+i
             % separate out angles for ease
             phi1 = eulers_r(1,i);
             Phi  = eulers_r(2,i);

@@ -52,6 +52,9 @@ function [eulers,nxtl,strain,blocks] = read_VPSC(filename)
     % and (3,:) = phi2) and a scalar nxtl, specifying the number of 
     % crystals / Euler angle triples.
 
+    addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
+    setup_env
+    
     % Read data from the file
     fid = fopen(filename); % Read - the default
     
