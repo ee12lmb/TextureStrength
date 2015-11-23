@@ -38,8 +38,8 @@ if (iscell(textures) == 1) % do we have multiple textures (e.g. cell array)
     
     for i = 1:runs
 
-        % call J_ngrains for this run 
-        J(i) = J_ngrains(textures{timestep},n,seed);
+        % call j_index for this run 
+        J(i) = j_index(textures{timestep},n,seed);
 
         % update seed for next run
         seed = seed + runs; % is this random enough?
@@ -49,8 +49,8 @@ else
     
     for i = 1:runs
 
-    % call J_ngrains for this run 
-    J(i) = J_ngrains(textures,n,seed);
+    % call j_index for this run 
+    J(i) = j_index(textures,n,seed);
 
     % update seed for next run
     seed = seed + runs; % is this random enough?

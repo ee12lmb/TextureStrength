@@ -1,4 +1,4 @@
-function [ J, strain ] = J_ngrains(input_texture,n,seed)
+function [ J, strain ] = j_index(input_texture,n,seed)
 %J_ngrains calculates the J index for a specified number of grains
 %   A number of grains (n) are selected at random from a VPSC input file.
 %   From this the J index is then calculated for each strain step present in the

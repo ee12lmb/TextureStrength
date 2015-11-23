@@ -19,9 +19,8 @@ addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/mtex-4.1.3/
 startup_mtex
 
 % add paths to function folders
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/Jstrain
+addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/J-index
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/M-index
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/Ngrains
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles
 
 % set global variable for other functions to see
