@@ -1,4 +1,4 @@
-function [ m,strain ] = m_indexDisc(input_texture,CS,n,seed)
+function [ m,strain ] = m_indexDisc(input_texture,CS,n,seed,varargin)
 %M_INDEXDISC calculates the M-index using a discrete method
 %   Takes either a VPSC file path or a cell array/matrix of a texture that
 %   has already been read in (see read_VPSC).
@@ -17,16 +17,7 @@ function [ m,strain ] = m_indexDisc(input_texture,CS,n,seed)
 %   Usage: [ m, strain ] = m_indexDisc(input_texture,n,seed)
 
 tic;
-
 %% Setup & read data
-
-% % set up MTEX package
-% addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/mtex-4.1.3/
-% startup_mtex;
-% 
-% % add path to read files
-% addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles/
-
 
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
 setup_env
@@ -37,6 +28,7 @@ if (ischar(input_texture) == 1)
     
     % if a file path is given then read in
     [textures,ngrains,strain,blocks] = sample_VPSC(input_texture,n,seed);
+    output = 0; % output format (see bottom of function)
     
 else
     
@@ -46,6 +38,7 @@ else
    % strain information cannot be extracted from inputted texture
    %+but should already be known from previous read_VPSC
    strain = 'Input is texture - strain already extracted';
+   output = 1;
  
 end
 
@@ -141,6 +134,64 @@ else
     end
 
 end
-toc
+
+
+%% Build output to file (if requested *NEEDS WORK*)
+
+time = toc;
+
+% check that we only have two input arguments
+assert((length(varargin) < 2),'Too many optional arguments!')
+
+if(isempty(varargin))
+    return % no options, do nothing
+    
+elseif ((ischar(varargin{1}))) % if optional argument is file path
+    
+    % assume that filepath checked in shell script/matlab can handle this
+    fid = fopen(varargin{1},'a'); % open file for writing (append, so can add headers in shell)
+
+    switch output
+        case 0     % our input was a file path so we know strain
+            
+            % build header
+            fprintf(fid,'-------------------------------------------------------------\n');
+            fprintf(fid,'Output data file from m_indexDisc run...\n');
+            fprintf(fid,'Input read from file: %s\n',input_texture);
+            fprintf(fid,'Number of grains sampled: %i\tSeed: %i\n',n,seed);
+            fprintf(fid,'Elapsed time (s): %f\n\n',time);
+            fprintf(fid,'%10s %10s\n','Strain','M-index');
+            fprintf(fid,'-------------------------------------------------------------\n');
+
+              for i = 1:length(m)
+                  fprintf(fid,'%10.5f %10.5f\n',strain(i),m(i));
+              end
+                
+        case 1     % our input was inputted texture so we don't know strain
+            
+            % build header
+            fprintf(fid,'-------------------------------------------------------------\n');
+            fprintf(fid,'Output data file from m_indexDisc run...\n');
+            fprintf(fid,'Input read from texture pre-loaded in matlab, strain unknown\n');
+            fprintf(fid,'Number of grains sampled: %i\tSeed: %i\n',n,seed);
+            fprintf(fid,'Elapsed time (s): %f\n\n',time);
+            fprintf(fid,'%10s\n','M-index');
+            fprintf(fid,'-------------------------------------------------------------\n');
+
+              for i = 1:length(m)
+                  fprintf(fid,'%10.5f\n',m(i));
+              end
+    end
+    fclose(fid);
+else
+    disp('Could not output data to file...')
+    disp('Final argument should be string containing output file path!')
+end
+    
+    
+
+
+
+
 end
 
