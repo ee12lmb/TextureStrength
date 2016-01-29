@@ -1,9 +1,22 @@
-function [ J, strain ] = j_index(input_texture,n,seed)
-%J_ngrains calculates the J index for a specified number of grains
-%   A number of grains (n) are selected at random from a VPSC input file.
-%   From this the J index is then calculated for each strain step present in the
-%   input file.
+function [ J, strain ] = j_index(input_texture,n,seed,varargin)
+%J_INDEX calculates the J index for a specified number of grains
+%   A number of grains (n) are selected at random from either an input file
+%   or a texture array already inputted into matlab (see read_VPSC). The
+%   J-index is then calculated for each time step.
+%
+%   Inputs:  input_texture - file path/texture array/texture matrix
+%                        n - number of grains to use
+%                     seed - allows repeatability of 'random' numbers
+%
+%            OPTIONAL: 'filename','[ name out output file ]'
+%                          - specify location to dump data to file
+%
+%   Outputs:             J - either single value/vector of J-index values
+%                   strain - if read from file, will be vector of strains
+%
+%   Usage: [ J, strain ] = j_index(input_texture,n,seed,varargin)
 
+tic;
 %% Setup & read data
 
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
@@ -13,7 +26,8 @@ setup_env
 if (ischar(input_texture) == 1)
     
     % if a file path is given then read in
-    [textures,ngrains,strain,blocks] = sample_VPSC(input_texture,n,seed);
+    [textures,~,strain,blocks] = sample_VPSC(input_texture,n,seed);
+    output = 0; % specifies the ouput format (as we DO have strain info)
     
 else
     
@@ -23,8 +37,30 @@ else
    % strain information cannot be extracted from inputted texture
    %+but should already be known from previous read_VPSC
    strain = 'Input is texture - strain already extracted'; 
+   output = 1; % specifies the output format (we DO NOT have strain info)
     
 end
+
+% check for optional arguments
+iarg = 1;
+wantout = 1; % we don't want output unless the 'filename' flag is active
+
+while iarg<(length(varargin))
+    switch varargin{iarg}
+        case 'filename'
+            iarg = iarg + 1; % take next argument as filename 
+            outfile = varargin{iarg};
+           
+            % check that we are not overwriting a file
+            check = exist(outfile,'file');
+            assert((check == 0),'Output file already exists!')
+           
+            wantout = 0;  % we do want the output to file
+        otherwise
+            error('Unknown flag')
+    end
+end
+
 
 % Set up symmetry
 CS = crystalSymmetry('Pbnm', [4.75, 10.20, 5.98]);
@@ -65,12 +101,50 @@ end
 
 %% Build output
 
-% strain vector - * need to update to pull this from file *
+time = toc;
 
-% 
-% for i = 1:length(J)
-%     fprintf('%f\t%f',J(i),strain(i))
-% end
+if (wantout == 0) % if the filepath has been given as an option
+    
+    % assume that filepath checked in shell script/matlab can handle this
+    fid = fopen(outfile,'a'); % open file for writing (append, so can add headers in shell)
+
+    switch output
+        case 0     % our input was a file path so we know strain
+            
+            % build header
+            fprintf(fid,'-------------------------------------------------------------\n');
+            fprintf(fid,'Output data file from j_index run...\n');
+            fprintf(fid,'Input read from file: %s\n',input_texture);
+            fprintf(fid,'Number of grains sampled: %i\tSeed: %i\n',n,seed);
+            fprintf(fid,'Elapsed time (s): %f\n\n',time);
+            fprintf(fid,'Data columns: Strain | J-index\n');
+            fprintf(fid,'-------------------------------------------------------------\n\n');
+            fprintf(fid,'++DATA++\n');
+
+              for i = 1:length(J)
+                  fprintf(fid,'%10.5f %10.5f\n',strain(i),J(i));
+              end
+                
+        case 1     % our input was inputted texture so we don't know strain
+            
+            % build header
+            fprintf(fid,'-------------------------------------------------------------\n');
+            fprintf(fid,'Output data file from j_index run...\n');
+            fprintf(fid,'Input read from texture pre-loaded in matlab, strain unknown\n');
+            fprintf(fid,'Number of grains sampled: %i\tSeed: %i\n',n,seed);
+            fprintf(fid,'Elapsed time (s): %f\n\n',time);
+            fprintf(fid,'Data columns: Strain | J-index');
+            fprintf(fid,'-------------------------------------------------------------\n\n');
+            fprintf(fid,'++DATA++\n')
+
+              for i = 1:length(J)
+                  fprintf(fid,'%10.5f\n',J(i));
+              end
+    end
+    fclose(fid);
+    
+    
+end
 
 end
 
