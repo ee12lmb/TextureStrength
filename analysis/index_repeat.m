@@ -7,6 +7,7 @@ function [ index ] = index_repeat(input_texture,step,n,repeat,seed,varargin)
 
 
 tic;
+t = clock;
 %% Setup evironment
 
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
@@ -81,7 +82,7 @@ end
 
 % assert that inputs are vaild
 assert((step < blocks),'Requested time step is out of range of input texture')
-assert((n <= ngrains),'Number of samples in the file is less than the number requested')
+assert((n <= ngrains(1)),'Number of samples in the file is less than the number requested')
 
 % separate out correct block if texture is cell array (i.e. multiple blocks)
 if (iscell(textures) == 1)
@@ -89,6 +90,7 @@ if (iscell(textures) == 1)
 end
 
 index = zeros(repeat,1); % initialise index array 
+ini_seed = seed; % capture initial seed for output file 
 
 for i = 1:repeat % loop over index calculation as many times as requested
 
@@ -107,5 +109,62 @@ for i = 1:repeat % loop over index calculation as many times as requested
 
 end
 
+%% Build output
+
+time = toc;
+
+if (wantout == 0) % if the filepath has been given as an option
+    
+    % assume that filepath checked in shell script/matlab can handle this
+    fid = fopen(outfile,'a'); % open file for writing (append, so can add headers in shell)
+
+    switch output
+        case 0     % our input was a file path so we know strain
+            
+            % build header
+            fprintf(fid,'IR\n'); % code for read_texout 
+            fprintf(fid,'+Function:\tindex_repeat\n');
+            fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
+            fprintf(fid,'+Input file:\t%s\n',input_texture);
+            fprintf(fid,'+Index:\t\t%s\n',lower(index_check));
+            fprintf(fid,'+Strain step:\t%i\n',step);
+            fprintf(fid,'+Strain:\t%f\n',strain(step));
+            fprintf(fid,'+Grains:\t%i\n',n);
+            fprintf(fid,'+Seed\t\t%i\n',ini_seed);
+            fprintf(fid,'+Repeat:\t%i\n',repeat);
+            fprintf(fid,'+Time taken(s):\t%f\n',time);
+            fprintf(fid,'+Columns:\tIndex\n\n');
+            fprintf(fid,'Data\n');
+
+            for i = 1:length(index)
+                fprintf(fid,'%10.5f\n',index(i));
+            end
+                
+        case 1     % our input was inputted texture so we don't know strain
+            
+                        % build header
+            fprintf(fid,'IR\n'); % code for read_texout 
+            fprintf(fid,'+Function:\tindex_repeat\n');
+            fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
+            fprintf(fid,'+Input file:\tn/a\n');
+            fprintf(fid,'+Index:\t\t%s\n',lower(index_check));
+            fprintf(fid,'+Strain step:\t%i\n',step);
+            fprintf(fid,'+Strain:\tn/a\n');
+            fprintf(fid,'+Grains:\t%i\n',n);
+            fprintf(fid,'+Seed\t\t%i\n',ini_seed);
+            fprintf(fid,'+Repeat:\t%i\n',repeat);
+            fprintf(fid,'+Time taken(s):\t%f\n',time);
+            fprintf(fid,'+Columns:\tIndex\n\n');
+            fprintf(fid,'Data\n');
+
+            for i = 1:length(index)
+                fprintf(fid,'%10.5f\n',index(i));
+            end
+
+    end
+    fclose(fid);
+    
+    
+end
 
 end
