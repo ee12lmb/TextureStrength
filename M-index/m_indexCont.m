@@ -21,25 +21,6 @@ tic;
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
 setup_env
 
-% check if input is raw VPSC or texture array
-if (ischar(input_texture) == 1)
-    
-    % if a file path is given then read in
-    [textures,ngrains,strain,blocks] = sample_VPSC(input_texture,n,seed);
-    output = 0; % specify output format for file
-    
-else
-    
-   % if input is not a file then pass to sample_texture to deal with
-   [textures,blocks] = sample_texture(input_texture,n,seed);
-   
-   % strain information cannot be extracted from inputted texture
-   %+but should already be known from previous read_VPSC
-   strain = 'Input is texture - strain already extracted'; 
-   output = 1;
-    
-end
-
 % check for optional arguments
 iarg = 1;
 wantout = 1; % we don't want output unless the 'filename' flag is active
@@ -58,6 +39,25 @@ while iarg<(length(varargin))
         otherwise
             error('Unknown flag')
     end
+end
+
+% check if input is raw VPSC or texture array
+if (ischar(input_texture) == 1)
+    
+    % if a file path is given then read in
+    [textures,ngrains,strain,blocks] = sample_VPSC(input_texture,n,seed);
+    output = 0; % specify output format for file
+    
+else
+    
+   % if input is not a file then pass to sample_texture to deal with
+   [textures,blocks] = sample_texture(input_texture,n,seed);
+   
+   % strain information cannot be extracted from inputted texture
+   %+but should already be known from previous read_VPSC
+   strain = 'Input is texture - strain already extracted'; 
+   output = 1;
+    
 end
 
 % Set up symmetry

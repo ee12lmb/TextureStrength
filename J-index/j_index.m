@@ -22,25 +22,6 @@ tic;
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
 setup_env
 
-% check if input is raw VPSC or texture array
-if (ischar(input_texture) == 1)
-    
-    % if a file path is given then read in
-    [textures,~,strain,blocks] = sample_VPSC(input_texture,n,seed);
-    output = 0; % specifies the ouput format (as we DO have strain info)
-    
-else
-    
-   % if input is not a file then pass to sample_texture to deal with
-   [textures,blocks] = sample_texture(input_texture,n,seed);
-   
-   % strain information cannot be extracted from inputted texture
-   %+but should already be known from previous read_VPSC
-   strain = 'Input is texture - strain already extracted'; 
-   output = 1; % specifies the output format (we DO NOT have strain info)
-    
-end
-
 % check for optional arguments
 iarg = 1;
 wantout = 1; % we don't want output unless the 'filename' flag is active
@@ -61,6 +42,25 @@ while iarg<(length(varargin))
     end
 end
 
+
+% check if input is raw VPSC or texture array
+if (ischar(input_texture) == 1)
+    
+    % if a file path is given then read in
+    [textures,~,strain,blocks] = sample_VPSC(input_texture,n,seed);
+    output = 0; % specifies the ouput format (as we DO have strain info)
+    
+else
+    
+   % if input is not a file then pass to sample_texture to deal with
+   [textures,blocks] = sample_texture(input_texture,n,seed);
+   
+   % strain information cannot be extracted from inputted texture
+   %+but should already be known from previous read_VPSC
+   strain = 'Input is texture - strain already extracted'; 
+   output = 1; % specifies the output format (we DO NOT have strain info)
+    
+end
 
 % Set up symmetry
 CS = crystalSymmetry('Pbnm', [4.75, 10.20, 5.98]);
@@ -135,7 +135,7 @@ if (wantout == 0) % if the filepath has been given as an option
             fprintf(fid,'Elapsed time (s): %f\n\n',time);
             fprintf(fid,'Data columns: Strain | J-index');
             fprintf(fid,'-------------------------------------------------------------\n\n');
-            fprintf(fid,'++DATA++\n')
+            fprintf(fid,'++DATA++\n');
 
               for i = 1:length(J)
                   fprintf(fid,'%10.5f\n',J(i));
