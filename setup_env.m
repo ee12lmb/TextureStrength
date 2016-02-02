@@ -22,6 +22,7 @@ startup_mtex
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/J-index
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/M-index
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles
+addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/analysis
 
 % set global variable for other functions to see
 ENVIRONMENT_SET = 1;
