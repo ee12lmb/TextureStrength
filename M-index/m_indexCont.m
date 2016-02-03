@@ -16,6 +16,7 @@ function [ m, strain ] = m_indexCont(input_texture,n,seed,varargin)
 %   Usage: [ m, strain ] = m_indexCont(input_texture,n,seed)
 
 tic;
+t = clock;
 %% Setup & read data
 
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
@@ -107,15 +108,15 @@ if (wantout == 0) % if the filepath has been given as an option
     switch output
         case 0     % our input was a file path so we know strain
             
-            % build header
-            fprintf(fid,'-------------------------------------------------------------\n');
-            fprintf(fid,'Output data file from m_indexCont run...\n');
-            fprintf(fid,'Input read from file: %s\n',input_texture);
-            fprintf(fid,'Number of grains sampled: %i\tSeed: %i\n',n,seed);
-            fprintf(fid,'Elapsed time (s): %f\n\n',time);
-            fprintf(fid,'Data columns: Strain | M-index\n');
-            fprintf(fid,'-------------------------------------------------------------\n\n');
-            fprintf(fid,'++DATA++\n');
+            fprintf(fid,'MC2\t%i\n',length(m)); % code for read_texout 
+            fprintf(fid,'+Function:\tm_indexCont\n');
+            fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
+            fprintf(fid,'+Input file:\t%s\n',input_texture);
+            fprintf(fid,'+Grains:\t%i\n',n);
+            fprintf(fid,'+Seed:\t\t%i\n',seed);
+            fprintf(fid,'+Time taken(s):\t%f\n',time);
+            fprintf(fid,'+Columns:\tStrain,M-index\n\n');
+            fprintf(fid,'Data\n');
 
               for i = 1:length(m)
                   fprintf(fid,'%10.5f %10.5f\n',strain(i),m(i));
@@ -124,14 +125,15 @@ if (wantout == 0) % if the filepath has been given as an option
         case 1     % our input was inputted texture so we don't know strain
             
             % build header
-            fprintf(fid,'-------------------------------------------------------------\n');
-            fprintf(fid,'Output data file from j_index run...\n');
-            fprintf(fid,'Input read from texture pre-loaded in matlab, strain unknown\n');
-            fprintf(fid,'Number of grains sampled: %i\tSeed: %i\n',n,seed);
-            fprintf(fid,'Elapsed time (s): %f\n\n',time);
-            fprintf(fid,'Data columns: Strain | M-index');
-            fprintf(fid,'-------------------------------------------------------------\n\n');
-            fprintf(fid,'++DATA++\n');
+            fprintf(fid,'MC1\t%i\n',length(m)); % code for read_texout 
+            fprintf(fid,'+Function:\tm_indexCont\n');
+            fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
+            fprintf(fid,'+Input file:\tn/a\n');
+            fprintf(fid,'+Grains:\t%i\n',n);
+            fprintf(fid,'+Seed:\t\t%i\n',seed);
+            fprintf(fid,'+Time taken(s):\t%f\n',time);
+            fprintf(fid,'+Columns:\tM-index\n\n');
+            fprintf(fid,'Data\n');
 
               for i = 1:length(m)
                   fprintf(fid,'%10.5f\n',m(i));

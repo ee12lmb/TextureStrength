@@ -81,7 +81,7 @@ end
 %% Repeat index calculation for different sampled texture
 
 % assert that inputs are vaild
-assert((step < blocks),'Requested time step is out of range of input texture')
+assert((step < blocks),'Requested strain step is out of range of input texture')
 assert((n <= ngrains(1)),'Number of samples in the file is less than the number requested')
 
 % separate out correct block if texture is cell array (i.e. multiple blocks)
@@ -122,7 +122,7 @@ if (wantout == 0) % if the filepath has been given as an option
         case 0     % our input was a file path so we know strain
             
             % build header
-            fprintf(fid,'IR\n'); % code for read_texout 
+            fprintf(fid,'IR\t%i\n',length(index)); % code for read_texout 
             fprintf(fid,'+Function:\tindex_repeat\n');
             fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
             fprintf(fid,'+Input file:\t%s\n',input_texture);
@@ -130,7 +130,7 @@ if (wantout == 0) % if the filepath has been given as an option
             fprintf(fid,'+Strain step:\t%i\n',step);
             fprintf(fid,'+Strain:\t%f\n',strain(step));
             fprintf(fid,'+Grains:\t%i\n',n);
-            fprintf(fid,'+Seed\t\t%i\n',ini_seed);
+            fprintf(fid,'+Seed:\t\t%i\n',ini_seed);
             fprintf(fid,'+Repeat:\t%i\n',repeat);
             fprintf(fid,'+Time taken(s):\t%f\n',time);
             fprintf(fid,'+Columns:\tIndex\n\n');
@@ -143,7 +143,7 @@ if (wantout == 0) % if the filepath has been given as an option
         case 1     % our input was inputted texture so we don't know strain
             
                         % build header
-            fprintf(fid,'IR\n'); % code for read_texout 
+            fprintf(fid,'IR\t%i\n',length(index)); % code for read_texout 
             fprintf(fid,'+Function:\tindex_repeat\n');
             fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
             fprintf(fid,'+Input file:\tn/a\n');
@@ -151,7 +151,7 @@ if (wantout == 0) % if the filepath has been given as an option
             fprintf(fid,'+Strain step:\t%i\n',step);
             fprintf(fid,'+Strain:\tn/a\n');
             fprintf(fid,'+Grains:\t%i\n',n);
-            fprintf(fid,'+Seed\t\t%i\n',ini_seed);
+            fprintf(fid,'+Seed:\t\t%i\n',ini_seed);
             fprintf(fid,'+Repeat:\t%i\n',repeat);
             fprintf(fid,'+Time taken(s):\t%f\n',time);
             fprintf(fid,'+Columns:\tIndex\n\n');
