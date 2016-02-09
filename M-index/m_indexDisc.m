@@ -1,4 +1,4 @@
-function [ m,strain ] = m_indexDisc(input_texture,CS,n,seed,varargin)
+function [ m,strain ] = m_indexDisc(input_texture,n,seed,varargin)
 %M_INDEXDISC calculates the M-index using a discrete method
 %   Takes either a VPSC file path or a cell array/matrix of a texture that
 %   has already been read in (see read_VPSC).
@@ -17,10 +17,31 @@ function [ m,strain ] = m_indexDisc(input_texture,CS,n,seed,varargin)
 %   Usage: [ m, strain ] = m_indexDisc(input_texture,n,seed)
 
 tic;
+t = clock;
 %% Setup & read data
 
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
 setup_env
+
+% check for optional arguments
+iarg = 1;
+wantout = 1; % we don't want output unless the 'filename' flag is active
+
+while iarg<(length(varargin))
+    switch varargin{iarg}
+        case 'outfile'
+            iarg = iarg + 1; % take next argument as filename 
+            outfile = varargin{iarg};
+           
+            % check that we are not overwriting a file
+            check = exist(outfile,'file');
+            assert((check == 0),'Output file already exists!')
+           
+            wantout = 0;  % we do want the output to file
+        otherwise
+            error('Unknown flag')
+    end
+end
 
 
 % check if input is raw VPSC or texture array
@@ -42,6 +63,9 @@ else
  
 end
 
+% Set up symmetry
+CS = crystalSymmetry('mmm');
+SS = specimenSymmetry('-1');
 
 %% Calculate and bin theoretical random dist
 
@@ -88,7 +112,14 @@ for i = 1:length(bins) % now loop through and sum relevant densities into each b
 end % end bin loop
 
 % normalise freq
+%uniform_freq = uniform_freq/300
 uniform_freq = uniform_freq/sum(uniform_freq);
+uniform_density = uniform_density/sum(uniform_density);
+
+% figure(1)
+% bar(bins,uniform_freq,'histc')
+% axis([0 140 0 0.025])
+
 
 
 %% Calculate and bin misorientation angles for each input texture
@@ -100,7 +131,6 @@ if (blocks == 1)
 
     % turn angle to degrees
     disorentation = disorentation/degree;
-    theta_max = theta_max/degree;
 
     % bin angles
     disor_freq = histc(disorentation,bins);
@@ -109,7 +139,7 @@ if (blocks == 1)
     disor_freq = disor_freq/sum(disor_freq);
 
     %% Calculate M-index
-    m = sum((abs(uniform_freq - disor_freq))/2);
+    m = (theta_max/length(bins))*sum((abs(uniform_freq - disor_freq))/2);
     
 else
 
@@ -120,16 +150,19 @@ else
 
         % turn angle to degrees
         disorentation = disorentation/degree;
-        theta_max = theta_max/degree;
 
         % bin angles
         disor_freq = histc(disorentation,bins);
 
         % normalise 
         disor_freq = disor_freq/sum(disor_freq);
+%         figure(i+1)
+%         bar(bins,disor_freq,'histc')
+%         axis([0 140 0 0.025]) 
 
         %% Calculate M-index
-        m(i) = sum((abs(uniform_freq - disor_freq))/2);
+
+        m(i) = (theta_max/length(bins))*sum((abs(uniform_freq - disor_freq))/2);
 
     end
 
@@ -140,28 +173,23 @@ end
 
 time = toc;
 
-% check that we only have two input arguments
-assert((length(varargin) < 2),'Too many optional arguments!')
-
-if(isempty(varargin))
-    return % no options, do nothing
-    
-elseif ((ischar(varargin{1}))) % if optional argument is file path
+if (wantout == 0) % if the filepath has been given as an option
     
     % assume that filepath checked in shell script/matlab can handle this
-    fid = fopen(varargin{1},'a'); % open file for writing (append, so can add headers in shell)
+    fid = fopen(outfile,'a'); % open file for writing (append, so can add headers in shell)
 
     switch output
         case 0     % our input was a file path so we know strain
             
-            % build header
-            fprintf(fid,'-------------------------------------------------------------\n');
-            fprintf(fid,'Output data file from m_indexDisc run...\n');
-            fprintf(fid,'Input read from file: %s\n',input_texture);
-            fprintf(fid,'Number of grains sampled: %i\tSeed: %i\n',n,seed);
-            fprintf(fid,'Elapsed time (s): %f\n\n',time);
-            fprintf(fid,'%10s %10s\n','Strain','M-index');
-            fprintf(fid,'-------------------------------------------------------------\n');
+            fprintf(fid,'MD2\t%i\n',length(m)); % code for read_texout 
+            fprintf(fid,'+Function:\tm_indexDisc\n');
+            fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
+            fprintf(fid,'+Input file:\t%s\n',input_texture);
+            fprintf(fid,'+Grains:\t%i\n',n);
+            fprintf(fid,'+Seed:\t\t%i\n',seed);
+            fprintf(fid,'+Time taken(s):\t%f\n',time);
+            fprintf(fid,'+Columns:\tStrain,M-index\n\n');
+            fprintf(fid,'Data\n');
 
               for i = 1:length(m)
                   fprintf(fid,'%10.5f %10.5f\n',strain(i),m(i));
@@ -170,28 +198,24 @@ elseif ((ischar(varargin{1}))) % if optional argument is file path
         case 1     % our input was inputted texture so we don't know strain
             
             % build header
-            fprintf(fid,'-------------------------------------------------------------\n');
-            fprintf(fid,'Output data file from m_indexDisc run...\n');
-            fprintf(fid,'Input read from texture pre-loaded in matlab, strain unknown\n');
-            fprintf(fid,'Number of grains sampled: %i\tSeed: %i\n',n,seed);
-            fprintf(fid,'Elapsed time (s): %f\n\n',time);
-            fprintf(fid,'%10s\n','M-index');
-            fprintf(fid,'-------------------------------------------------------------\n');
+            fprintf(fid,'MD1\t%i\n',length(m)); % code for read_texout 
+            fprintf(fid,'+Function:\tm_indexDisc\n');
+            fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
+            fprintf(fid,'+Input file:\tn/a\n');
+            fprintf(fid,'+Grains:\t%i\n',n);
+            fprintf(fid,'+Seed:\t\t%i\n',seed);
+            fprintf(fid,'+Time taken(s):\t%f\n',time);
+            fprintf(fid,'+Columns:\tM-index\n\n');
+            fprintf(fid,'Data\n');
 
               for i = 1:length(m)
                   fprintf(fid,'%10.5f\n',m(i));
               end
     end
     fclose(fid);
-else
-    disp('Could not output data to file...')
-    disp('Final argument should be string containing output file path!')
+    
+    
 end
-    
-    
-
-
-
-
+   
 end
 
