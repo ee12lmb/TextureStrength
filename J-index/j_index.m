@@ -29,7 +29,7 @@ wantout = 1; % we don't want output unless the 'filename' flag is active
 
 while iarg<(length(varargin))
     switch varargin{iarg}
-        case 'filename'
+        case 'outfile'
             iarg = iarg + 1; % take next argument as filename 
             outfile = varargin{iarg};
            

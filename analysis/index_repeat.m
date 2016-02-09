@@ -22,7 +22,7 @@ while iarg<(length(varargin))
     switch lower(varargin{iarg})
         
         % deal with filename flag-----------------------------------------
-        case 'filename'
+        case 'outfile'
             iarg = iarg + 1; % take next argument as filename 
             outfile = varargin{iarg};
            
