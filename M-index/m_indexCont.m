@@ -20,15 +20,21 @@ t = clock;
 %% Setup & read data
 
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
-setup_env
+setup_env;
 
 % check for optional arguments
 iarg = 1;
 wantout = 1; % we don't want output unless the 'filename' flag is active
 
+% setup defautl symmetry (olivine)
+CS = crystalSymmetry('Pbnm', [4.75, 10.20, 5.98]);
+SS = specimenSymmetry('-1');
+crystal = 'olivine';
+
 while iarg<(length(varargin))
     switch varargin{iarg}
         case 'outfile'
+            
             iarg = iarg + 1; % take next argument as filename 
             outfile = varargin{iarg};
            
@@ -37,9 +43,17 @@ while iarg<(length(varargin))
             assert((check == 0),'Output file already exists!')
            
             wantout = 0;  % we do want the output to file
+            
+         case 'crystal'  % find the appropriate symmetry 
+            
+            iarg = iarg + 1; % take next argument
+            crystal = varargin{iarg};
+            CS = lookupSym(crystal);
+            
         otherwise
             error('Unknown flag')
     end
+    iarg = iarg + 1;
 end
 
 % check if input is raw VPSC or texture array
@@ -61,9 +75,6 @@ else
     
 end
 
-% Set up symmetry
-CS = crystalSymmetry('Pbnm', [4.75, 10.20, 5.98]);
-SS = specimenSymmetry('-1');
 
 % get misorientation angle distribution for specified symmetry
 [uniform_density,uniform_angles] = calcAngleDistribution(CS);
@@ -112,10 +123,11 @@ if (wantout == 0) % if the filepath has been given as an option
             fprintf(fid,'+Function:\tm_indexCont\n');
             fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
             fprintf(fid,'+Input file:\t%s\n',input_texture);
+            fprintf(fid,'+Crystal:\t%s\n',crystal);
             fprintf(fid,'+Grains:\t%i\n',n);
             fprintf(fid,'+Seed:\t\t%i\n',seed);
             fprintf(fid,'+Time taken(s):\t%f\n',time);
-            fprintf(fid,'+Columns:\tStrain,M-index\n\n');
+            fprintf(fid,'+Columns:\tStrain,M-index\n');
             fprintf(fid,'Data\n');
 
               for i = 1:length(m)
@@ -129,10 +141,11 @@ if (wantout == 0) % if the filepath has been given as an option
             fprintf(fid,'+Function:\tm_indexCont\n');
             fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
             fprintf(fid,'+Input file:\tn/a\n');
+            fprintf(fid,'+Crystal:\t%s\n',crystal);
             fprintf(fid,'+Grains:\t%i\n',n);
             fprintf(fid,'+Seed:\t\t%i\n',seed);
             fprintf(fid,'+Time taken(s):\t%f\n',time);
-            fprintf(fid,'+Columns:\tM-index\n\n');
+            fprintf(fid,'+Columns:\tM-index\n');
             fprintf(fid,'Data\n');
 
               for i = 1:length(m)

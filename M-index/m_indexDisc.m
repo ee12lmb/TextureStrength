@@ -21,15 +21,21 @@ t = clock;
 %% Setup & read data
 
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
-setup_env
+setup_env;
 
 % check for optional arguments
 iarg = 1;
 wantout = 1; % we don't want output unless the 'filename' flag is active
 
+% setup defautl symmetry (olivine)
+CS = crystalSymmetry('Pbnm', [4.75, 10.20, 5.98]);
+SS = specimenSymmetry('-1');
+crystal = 'olivine';
+
 while iarg<(length(varargin))
     switch varargin{iarg}
         case 'outfile'
+            
             iarg = iarg + 1; % take next argument as filename 
             outfile = varargin{iarg};
            
@@ -38,9 +44,17 @@ while iarg<(length(varargin))
             assert((check == 0),'Output file already exists!')
            
             wantout = 0;  % we do want the output to file
+            
+         case 'crystal'  % find the appropriate symmetry 
+            
+            iarg = iarg + 1; % take next argument
+            crystal = varargin{iarg};
+            CS = lookupSym(crystal);
+             
         otherwise
             error('Unknown flag')
     end
+    iarg = iarg + 1;
 end
 
 
@@ -63,9 +77,6 @@ else
  
 end
 
-% Set up symmetry
-CS = crystalSymmetry('mmm');
-SS = specimenSymmetry('-1');
 
 %% Calculate and bin theoretical random dist
 
@@ -176,41 +187,41 @@ time = toc;
 if (wantout == 0) % if the filepath has been given as an option
     
     % assume that filepath checked in shell script/matlab can handle this
-    fid = fopen(outfile,'a'); % open file for writing (append, so can add headers in shell)
+    fid = fopen(outfile,'w'); % open file for writing - will overwrite
 
     switch output
         case 0     % our input was a file path so we know strain
             
-            fprintf(fid,'MD2\t%i\n',length(m)); % code for read_texout 
-            fprintf(fid,'+Function:\tm_indexDisc\n');
-            fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
-            fprintf(fid,'+Input file:\t%s\n',input_texture);
-            fprintf(fid,'+Grains:\t%i\n',n);
-            fprintf(fid,'+Seed:\t\t%i\n',seed);
-            fprintf(fid,'+Time taken(s):\t%f\n',time);
-            fprintf(fid,'+Columns:\tStrain,M-index\n\n');
-            fprintf(fid,'Data\n');
-
-              for i = 1:length(m)
-                  fprintf(fid,'%10.5f %10.5f\n',strain(i),m(i));
-              end
+            fprintf(fid,['MD2\t%i\n',...  % build header in one fprintf call
+                        '+Function:\tm_indexDisc\n',...
+                        '+Time/date:\t%i:%i %i/%i/%i\n',...
+                        '+Input file:\t%s\n',...
+                        '+Crystal:\t%s\n'...
+                        '+Grains:\t%i\n',...
+                        '+Seed:\t\t%i\n',...
+                        '+Time taken(s):\t%f\n',...
+                        '+Columns:\tStrain,M-index\n',...
+                        'Data\n'],...
+                        length(m),t(4),t(5),t(3),t(2),t(1),input_texture,crystal,n,seed,time);
+            
+            fprintf(fid,'%10.5f %10.5f\n',[strain;m]); % dump data to file
+       
                 
         case 1     % our input was inputted texture so we don't know strain
             
             % build header
-            fprintf(fid,'MD1\t%i\n',length(m)); % code for read_texout 
-            fprintf(fid,'+Function:\tm_indexDisc\n');
-            fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
-            fprintf(fid,'+Input file:\tn/a\n');
-            fprintf(fid,'+Grains:\t%i\n',n);
-            fprintf(fid,'+Seed:\t\t%i\n',seed);
-            fprintf(fid,'+Time taken(s):\t%f\n',time);
-            fprintf(fid,'+Columns:\tM-index\n\n');
-            fprintf(fid,'Data\n');
+            fprintf(fid,['MD1\t%i\n',...
+                         '+Function:\tm_indexDisc\n',...
+                         '+Time/date:\t%i:%i %i/%i/%i\n',...
+                         '+Input file:\tn/a\n',...
+                         '+Crystal:\t%s\n'...
+                         '+Grains:\t%i\n',...
+                         '+Seed:\t\t%i\n','+Time taken(s):\t%f\n',...
+                         '+Columns:\tM-index\n','Data\n'],...
+                         length(m),t(4),t(5),t(3),t(2),t(1),crystal,n,seed,time);  
 
-              for i = 1:length(m)
-                  fprintf(fid,'%10.5f\n',m(i));
-              end
+            fprintf(fid,'%10.5f\n',m);
+ 
     end
     fclose(fid);
     
