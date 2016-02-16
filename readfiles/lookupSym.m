@@ -1,6 +1,11 @@
 function [ CS ] = lookupSym(crystal)
 %LOOKUPSYM finds symmetry for a given crystal
 
+addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
+setup_env;
+
+%% Find symmetry
+
 switch lower(crystal)
     case 'olivine'
         
