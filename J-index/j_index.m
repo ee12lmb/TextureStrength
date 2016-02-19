@@ -57,28 +57,8 @@ while iarg<(length(varargin))
     iarg = iarg + 1;
 end
 
-
-% check if input is raw VPSC or texture array
-if (ischar(input_texture) == 1)
-    
-    % if a file path is given then read in
-    [textures,~,strain,blocks] = sample_VPSC(input_texture,n,seed);
-    output = 0; % specifies the ouput format (as we DO have strain info)
-    
-else
-    
-   % if input is not a file then pass to sample_texture to deal with
-   [textures,blocks] = sample_texture(input_texture,n,seed);
-   
-   % strain information cannot be extracted from inputted texture
-   %+but should already be known from previous read_VPSC
-   strain = 'Input is texture - strain already extracted'; 
-   output = 1; % specifies the output format (we DO NOT have strain info)
-    
-end
-
-% Set up symmetry
-
+% determine input type and extract relevant information
+[ textures, strain, blocks, input_texture, output ] = get_inputInfo(input_texture,n,seed,crystal);
 
     
 %% Calculate J-index 
@@ -147,7 +127,7 @@ if (wantout == 0) % if the filepath has been given as an option
             fprintf(fid,'J1\t%i\n',length(J)); % code for read_texout 
             fprintf(fid,'+Function:\tj_index\n');
             fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
-            fprintf(fid,'+Input file:\tn/a\n');
+            fprintf(fid,'+Input file:\t%s\n',input_texture);
             fprintf(fid,'+Crystal:\t%s\n',crystal);
             fprintf(fid,'+Grains:\t%i\n',n);
             fprintf(fid,'+Seed\t\t%i\n',seed);

@@ -58,24 +58,8 @@ while iarg<(length(varargin))
 end
 
 
-% check if input is raw VPSC or texture array
-if (ischar(input_texture) == 1)
-    
-    % if a file path is given then read in
-    [textures,ngrains,strain,blocks] = sample_VPSC(input_texture,n,seed);
-    output = 0; % output format (see bottom of function)
-    
-else
-    
-   % if input is not a file then pass to sample_texture to deal with
-   [textures,blocks,~] = sample_texture(input_texture,n,seed);
-   
-   % strain information cannot be extracted from inputted texture
-   %+but should already be known from previous read_VPSC
-   strain = 'Input is texture - strain already extracted';
-   output = 1;
- 
-end
+% determine input type and extract relevant information
+[ textures, strain, blocks, input_texture, output ] = get_inputInfo(input_texture,n,seed,crystal);
 
 
 %% Calculate and bin theoretical random dist
@@ -213,12 +197,12 @@ if (wantout == 0) % if the filepath has been given as an option
             fprintf(fid,['MD1\t%i\n',...
                          '+Function:\tm_indexDisc\n',...
                          '+Time/date:\t%i:%i %i/%i/%i\n',...
-                         '+Input file:\tn/a\n',...
+                         '+Input file:\t%s\n',...
                          '+Crystal:\t%s\n'...
                          '+Grains:\t%i\n',...
                          '+Seed:\t\t%i\n','+Time taken(s):\t%f\n',...
                          '+Columns:\tM-index\n','Data\n'],...
-                         length(m),t(4),t(5),t(3),t(2),t(1),crystal,n,seed,time);  
+                         length(m),t(4),t(5),t(3),t(2),t(1),input_texture,crystal,n,seed,time);  
 
             fprintf(fid,'%10.5f\n',m);
  

@@ -56,28 +56,13 @@ while iarg<(length(varargin))
     iarg = iarg + 1;
 end
 
-% check if input is raw VPSC or texture array
-if (ischar(input_texture) == 1)
-    
-    % if a file path is given then read in
-    [textures,ngrains,strain,blocks] = sample_VPSC(input_texture,n,seed);
-    output = 0; % specify output format for file
-    
-else
-    
-   % if input is not a file then pass to sample_texture to deal with
-   [textures,blocks] = sample_texture(input_texture,n,seed);
-   
-   % strain information cannot be extracted from inputted texture
-   %+but should already be known from previous read_VPSC
-   strain = 'Input is texture - strain already extracted'; 
-   output = 1;
-    
-end
+
+% determine input type and extract relevant information
+[ textures, strain, blocks, input_texture, output ] = get_inputInfo(input_texture,n,seed,crystal);
 
 
 % get misorientation angle distribution for specified symmetry
-[uniform_density,uniform_angles] = calcAngleDistribution(CS);
+[uniform_density,~] = calcAngleDistribution(CS);
 uniform_density_N = uniform_density/sum(uniform_density); % normalise
 
 %% Calculate M-index 
@@ -134,13 +119,13 @@ if (wantout == 0) % if the filepath has been given as an option
                   fprintf(fid,'%10.5f %10.5f\n',strain(i),m(i));
               end
                 
-        case 1     % our input was inputted texture so we don't know strain
+        case 1     % our input was matrix/EBSD so we don't know strain
             
             % build header
             fprintf(fid,'MC1\t%i\n',length(m)); % code for read_texout 
             fprintf(fid,'+Function:\tm_indexCont\n');
             fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
-            fprintf(fid,'+Input file:\tn/a\n');
+            fprintf(fid,'+Input file:\t%s\n',input_texture);
             fprintf(fid,'+Crystal:\t%s\n',crystal);
             fprintf(fid,'+Grains:\t%i\n',n);
             fprintf(fid,'+Seed:\t\t%i\n',seed);
