@@ -27,12 +27,14 @@ setup_env;
 iarg = 1;
 wantout = 1; % we don't want output unless the 'filename' flag is active
 
-% setup defautl symmetry (olivine)
+% setup defautlts (olivine, 1 degree bins)
 CS = crystalSymmetry('Pbnm', [4.75, 10.20, 5.98]);
 SS = specimenSymmetry('-1');
 crystal = 'olivine';
+binSize = 1;
+hist = 0;
 
-while iarg<(length(varargin))
+while iarg<=(length(varargin))
     switch varargin{iarg}
         case 'outfile'
             
@@ -50,6 +52,16 @@ while iarg<(length(varargin))
             iarg = iarg + 1; % take next argument
             crystal = varargin{iarg};
             CS = lookupSym(crystal);
+            
+        case 'bin' % sets bin size
+            
+            iarg = iarg + 1; 
+            binSize = varargin{iarg};
+            
+        case 'hist' % will plot histograms at all time steps
+            
+            hist = 1;
+            disp('Plotting histograms...')
              
         otherwise
             error('Unknown flag')
@@ -75,7 +87,7 @@ theta_max = theta_max/degree;
 uniform_angles = uniform_angles/degree;
 
 % calculate bin dimensions (here set to one degree - *could take input?*)
-bins = linspace(0,theta_max,theta_max+1);
+bins = linspace(0,theta_max,(1/binSize)*theta_max+1);
 
 % calcAngleDistribution returns angles and densities as a fraction of 300
 % (not sure why, seems arbitrary). To solve, need to sum up density in the
@@ -91,6 +103,8 @@ uniform_freq = zeros(1,length(bins));
 j = 1; % initialise loop counter
 for i = 1:length(bins) % now loop through and sum relevant densities into each bin
 
+    if (Nangles_in_bins(i) == 0); continue; end
+    
     for null = 1:Nangles_in_bins(i) % sum up correct indicies for this bin
         
         % e.g. if three angles lie in this bin, loop three times and sum
@@ -111,9 +125,11 @@ end % end bin loop
 uniform_freq = uniform_freq/sum(uniform_freq);
 uniform_density = uniform_density/sum(uniform_density);
 
-% figure(1)
-% bar(bins,uniform_freq,'histc')
-% axis([0 140 0 0.025])
+if (hist == 1)
+    figure(1)
+    bar(bins,uniform_freq,'histc')
+    axis([0 140 0 0.025])
+end
 
 
 
@@ -151,9 +167,12 @@ else
 
         % normalise 
         disor_freq = disor_freq/sum(disor_freq);
-%         figure(i+1)
-%         bar(bins,disor_freq,'histc')
-%         axis([0 140 0 0.025]) 
+        
+        if (hist == 1)
+            figure(i+1)
+            bar(bins,disor_freq,'histc')
+            axis([0 140 0 0.025]) 
+        end
 
         %% Calculate M-index
 
@@ -181,12 +200,12 @@ if (wantout == 0) % if the filepath has been given as an option
                         '+Time/date:\t%i:%i %i/%i/%i\n',...
                         '+Input file:\t%s\n',...
                         '+Crystal:\t%s\n'...
-                        '+Grains:\t%i\n',...
+                        '+Grains:\t%i (bin size: %i degrees)',...
                         '+Seed:\t\t%i\n',...
                         '+Time taken(s):\t%f\n',...
                         '+Columns:\tStrain,M-index\n',...
                         'Data\n'],...
-                        length(m),t(4),t(5),t(3),t(2),t(1),input_texture,crystal,n,seed,time);
+                        length(m),t(4),t(5),t(3),t(2),t(1),input_texture,crystal,n,binSize,seed,time);
             
             fprintf(fid,'%10.5f %10.5f\n',[strain;m]); % dump data to file
        
@@ -199,10 +218,10 @@ if (wantout == 0) % if the filepath has been given as an option
                          '+Time/date:\t%i:%i %i/%i/%i\n',...
                          '+Input file:\t%s\n',...
                          '+Crystal:\t%s\n'...
-                         '+Grains:\t%i\n',...
+                         '+Grains:\t%i (bin size %i degrees)',...
                          '+Seed:\t\t%i\n','+Time taken(s):\t%f\n',...
                          '+Columns:\tM-index\n','Data\n'],...
-                         length(m),t(4),t(5),t(3),t(2),t(1),input_texture,crystal,n,seed,time);  
+                         length(m),t(4),t(5),t(3),t(2),t(1),input_texture,crystal,n,binSize,seed,time);  
 
             fprintf(fid,'%10.5f\n',m);
  
