@@ -1,4 +1,4 @@
-function [ m,strain ] = m_indexDisc(input_texture,n,seed,varargin)
+function [ m,strain,disor_freq ] = m_indexDisc(input_texture,n,seed,varargin)
 %M_INDEXDISC calculates the M-index using a discrete method
 %   Takes either a VPSC file path or a cell array/matrix of a texture that
 %   has already been read in (see read_VPSC).
@@ -33,6 +33,7 @@ SS = specimenSymmetry('-1');
 crystal = 'olivine';
 binSize = 1;
 hist = 0;
+binType = 0; % by default use interp binning
 
 while iarg<=(length(varargin))
     switch varargin{iarg}
@@ -62,6 +63,21 @@ while iarg<=(length(varargin))
             
             hist = 1;
             disp('Plotting histograms...')
+            
+        case 'binning'
+            
+            iarg = iarg + 1;
+            binning = varargin{iarg};
+            
+            switch lower(binning) % assign binning flag for later
+                case 'interp'
+                    binType = 0;
+                case 'rebin'
+                    binType = 1;
+                otherwise
+                    error('Unrecognised binning algorithm')
+            end
+            
              
         otherwise
             error('Unknown flag')
@@ -72,12 +88,13 @@ end
 
 % determine input type and extract relevant information
 [ textures, strain, blocks, input_texture, output ] = get_inputInfo(input_texture,n,seed,crystal);
-
+   
 
 %% Calculate and bin theoretical random dist
 
 % find theoretic distribution density
 [ uniform_density, uniform_angles ] = calcAngleDistribution(CS);
+
 
 % find max theoretical angle
 theta_max = uniform_angles(length(uniform_angles));
@@ -85,45 +102,102 @@ theta_max = uniform_angles(length(uniform_angles));
 % turn to degrees
 theta_max = theta_max/degree;
 uniform_angles = uniform_angles/degree;
+%uniform_density = uniform_density/sum(uniform_density);
+
 
 % calculate bin dimensions (here set to one degree - *could take input?*)
-bins = linspace(0,theta_max,(1/binSize)*theta_max+1);
+bins = linspace(0,theta_max,((1/binSize)*theta_max)+1);
+%mid_bin = bins + 0.5*binSize;
+%mid_bin(length(mid_bin)) = bins(length(bins));
 
-% calcAngleDistribution returns angles and densities as a fraction of 300
-% (not sure why, seems arbitrary). To solve, need to sum up density in the
-% bins that we have defined
-
-% find number of angles returned from calcAngleDist in our defined bins
-Nangles_in_bins = histc(uniform_angles,bins);
-
-% intialise freq sum for all bins
-uniform_freq = zeros(1,length(bins));  
-
-
-j = 1; % initialise loop counter
-for i = 1:length(bins) % now loop through and sum relevant densities into each bin
-
-    if (Nangles_in_bins(i) == 0); continue; end
+if (binType == 0) %----------INTERP ALGORITHM--------------------------------
     
-    for null = 1:Nangles_in_bins(i) % sum up correct indicies for this bin
+    % initialise freq array
+    uniform_freq = zeros(1,length(bins));
+    
+    % deal with first bin(always zero)
+    uniform_freq(1) = uniform_density(1);
+    
+    % loop over each of our new bins
+    for i = 2:length(bins)
         
-        % e.g. if three angles lie in this bin, loop three times and sum
-        uniform_freq(i) = uniform_freq(i) + uniform_density(j);
-
-        % increase counter
-        j = j +1;
-
-    end 
+        % find which of the MTEX bins is our upper limit
+        for j = 2:length(uniform_angles)
+            
+            % found 1st MTEX angle that is bigger than current bin
+            if (bins(i) < uniform_angles(j)) 
+                
+                up = uniform_angles(j);
+                low = uniform_angles(j-1);
+                
+                % find the gradient
+                grad = (uniform_density(j) - uniform_density(j-1))/...
+                        (uniform_angles(j) - uniform_angles(j-1));
+                    
+                xinc = bins(i) - uniform_angles(j-1);
+                yinc = grad*xinc;
+                uniform_density(j-1);
+                
+                % use gradient to find y incriment
+                % e.g. dy = m*dx
+                uniform_freq(i) = ((uniform_density(j-1) + (grad*(bins(i) - uniform_angles(j-1))))/(1/300*theta_max))*binSize;
+                
+                break % we've found limits so move to next bin
+            end % if
+            
+        end % loop to find bounds
+                      
+    end % looping over defined bins
     
-    % have increased height for this bin, now deal with increased bin width
-    uniform_freq(i) = uniform_freq(i)/Nangles_in_bins(i);
+    % normalise
+    uniform_freq = uniform_freq/(sum(uniform_freq)*binSize);
+    uniform_density = uniform_density/sum(uniform_density);
     
-end % end bin loop
+    figure(100)
+    hold on
+    plot(uniform_angles,uniform_density,'r.-')
+    plot(bins,uniform_freq,'bo')
+    
 
-% normalise freq
-%uniform_freq = uniform_freq/300
-uniform_freq = uniform_freq/sum(uniform_freq);
-uniform_density = uniform_density/sum(uniform_density);
+else % ---------------------REBINNING ALGORITHM-------------------------------
+
+    % calcAngleDistribution returns angles and densities as a fraction of 300
+    % (not sure why, seems arbitrary). To solve, need to sum up density in the
+    % bins that we have defined
+
+    % find number of angles returned from calcAngleDist in our defined bins
+    Nangles_in_bins = histc(uniform_angles,bins);
+
+    % intialise freq sum for all bins
+    uniform_freq = zeros(1,length(bins));  
+
+
+    j = 1; % initialise loop counter
+    for i = 1:length(bins) % now loop through and sum relevant densities into each bin
+    return
+        if (Nangles_in_bins(i) == 0); continue; end
+
+        for null = 1:Nangles_in_bins(i) % sum up correct indicies for this bin
+
+            % e.g. if three angles lie in this bin, loop three times and sum
+            uniform_freq(i) = uniform_freq(i) + uniform_density(j);
+
+            % increase counter
+            j = j +1;
+
+        end 
+
+        % have increased height for this bin, now deal with increased bin width
+        uniform_freq(i) = uniform_freq(i)/(binSize*Nangles_in_bins(i));
+
+    end % end bin loop
+
+    % normalise freq
+    %uniform_freq = uniform_freq/300
+    uniform_freq = uniform_freq/sum(uniform_freq);
+    uniform_density = uniform_density/sum(uniform_density);
+
+end
 
 if (hist == 1)
     figure(1)
@@ -131,10 +205,11 @@ if (hist == 1)
     axis([0 140 0 0.025])
 end
 
-
-
 %% Calculate and bin misorientation angles for each input texture
-
+    %assert(binSize == (theta_max/length(bins)), 'something went wrong')
+    disp('Test')
+    binSize
+    theta_max/length(bins)
 if (blocks == 1)
     
     % find misorientation angle distribution
@@ -147,11 +222,20 @@ if (blocks == 1)
     disor_freq = histc(disorentation,bins);
 
     % normalise 
-    disor_freq = disor_freq/sum(disor_freq);
+    disor_freq = disor_freq/(sum(disor_freq)*binSize);
+    
+    if (hist == 1)
+        figure(i+1)
+        bar(bins,disor_freq,'histc')
+        axis([0 140 0 0.025]) 
+    end
+
 
     %% Calculate M-index
-    m = (theta_max/length(bins))*sum((abs(uniform_freq - disor_freq))/2);
-    
+    %m = (theta_max/(length(bins))*sum((abs(uniform_freq - disor_freq))/2);
+    %m = (theta_max/(2*length(bins)))*sum(abs(uniform_freq - disor_freq));
+    m = (binSize/2)*sum(abs(uniform_freq - disor_freq));
+
 else
 
     for i = 1:blocks 
@@ -176,7 +260,9 @@ else
 
         %% Calculate M-index
 
-        m(i) = (theta_max/length(bins))*sum((abs(uniform_freq - disor_freq))/2);
+        %m(i) = (theta_max/(length(bins))*sum((abs(uniform_freq - disor_freq))/2);
+        %m(i) = (theta_max/(2*length(bins)))*sum(abs(uniform_freq - disor_freq));
+        m(i) = (binSize/2)*sum(abs(uniform_freq - disor_freq));
 
     end
 
@@ -200,12 +286,12 @@ if (wantout == 0) % if the filepath has been given as an option
                         '+Time/date:\t%i:%i %i/%i/%i\n',...
                         '+Input file:\t%s\n',...
                         '+Crystal:\t%s\n'...
-                        '+Grains:\t%i (bin size: %i degrees)',...
+                        '+Grains:\t%i (bin size: %f degrees, binning: %s)\n',...
                         '+Seed:\t\t%i\n',...
                         '+Time taken(s):\t%f\n',...
                         '+Columns:\tStrain,M-index\n',...
                         'Data\n'],...
-                        length(m),t(4),t(5),t(3),t(2),t(1),input_texture,crystal,n,binSize,seed,time);
+                        length(m),t(4),t(5),t(3),t(2),t(1),input_texture,crystal,n,binSize,binning,seed,time);
             
             fprintf(fid,'%10.5f %10.5f\n',[strain;m]); % dump data to file
        
@@ -218,10 +304,10 @@ if (wantout == 0) % if the filepath has been given as an option
                          '+Time/date:\t%i:%i %i/%i/%i\n',...
                          '+Input file:\t%s\n',...
                          '+Crystal:\t%s\n'...
-                         '+Grains:\t%i (bin size %i degrees)',...
+                         '+Grains:\t%i (bin size: %f degrees, binning: %s)\n',...
                          '+Seed:\t\t%i\n','+Time taken(s):\t%f\n',...
                          '+Columns:\tM-index\n','Data\n'],...
-                         length(m),t(4),t(5),t(3),t(2),t(1),input_texture,crystal,n,binSize,seed,time);  
+                         length(m),t(4),t(5),t(3),t(2),t(1),input_texture,crystal,n,binSize,binning,seed,time);  
 
             fprintf(fid,'%10.5f\n',m);
  
