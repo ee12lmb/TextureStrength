@@ -22,6 +22,8 @@ method = 0;  % default method to use is J-index
 CS = crystalSymmetry('Pbnm', [4.75, 10.20, 5.98]);
 SS = specimenSymmetry('-1');
 crystal = 'olivine';
+bin = 1;
+binning = 'interp';
 
 while iarg<(length(varargin))
     switch lower(varargin{iarg})
@@ -58,7 +60,17 @@ while iarg<(length(varargin))
             
             iarg = iarg + 1; % take next argument
             crystal = varargin{iarg};
-            CS = lookupSym(crystal);
+            
+        case 'bin' % for use with discrete M-index (1 degree default)
+            
+            iarg = iarg + 1;
+            bin = varargin{iarg};
+            
+        case 'binning' % use with discrete M-index
+            
+            iarg = iarg + 1;
+            binning = varargin{iarg};
+           
         %-----------------------------------------------------------------
         otherwise
             error('Unknown flag')
@@ -125,7 +137,7 @@ for i = 1:repeat % loop over index calculation as many times as requested
         [ index(i), ~] = m_indexCont(textures,n,seed,'crystal',crystal);
         
     elseif (method == 2) % discrete M-index
-        [ index(i), ~] = m_indexDisc(textures,n,seed,'crystal',crystal);
+        [ index(i), ~] = m_indexDisc(textures,n,seed,'crystal',crystal,'bin',bin,'binning',binning);
     end
     
     seed = seed + 1; % now sample with a different seed 
@@ -149,7 +161,13 @@ if (wantout == 0) % if the filepath has been given as an option
             fprintf(fid,'+Function:\tindex_repeat\n');
             fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
             fprintf(fid,'+Input file:\t%s\n',input_texture);
-            fprintf(fid,'+Index:\t\t%s\n',lower(index_check));
+            
+            if (method == 2) % if discrete, useful to print out bin size
+                fprintf(fid,'+Index:\t\t%s (bin size: %f degrees, binning: %s)\n',lower(index_check),bin,binning);
+            else
+                fprintf(fid,'+Index:\t\t%s\n',lower(index_check));
+            end
+            
             fprintf(fid,'+Strain step:\t%i\n',step);
             fprintf(fid,'+Strain:\t%f\n',strain(step));
             fprintf(fid,'+Crystal:\t%s\n',crystal);
@@ -171,7 +189,13 @@ if (wantout == 0) % if the filepath has been given as an option
             fprintf(fid,'+Function:\tindex_repeat\n');
             fprintf(fid,'+Time/date:\t%i:%i %i/%i/%i\n',t(4),t(5),t(3),t(2),t(1));
             fprintf(fid,'+Input file:\t%s\n',input_texture);
-            fprintf(fid,'+Index:\t\t%s\n',lower(index_check));
+            
+            if (method == 2) % if discrete, useful to print out bin size
+                fprintf(fid,'+Index:\t\t%s (bin size: %f degrees, binning: %s)\n',lower(index_check),bin,binning);
+            else
+                fprintf(fid,'+Index:\t\t%s\n',lower(index_check));
+            end
+            
             fprintf(fid,'+Strain step:\t%i\n',step);
             fprintf(fid,'+Strain:\tn/a\n');
             fprintf(fid,'+Crystal:\t%s\n',crystal);
