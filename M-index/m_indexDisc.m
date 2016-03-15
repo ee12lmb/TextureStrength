@@ -34,6 +34,7 @@ crystal = 'olivine';
 binSize = 1;
 hist = 0;
 binType = 0; % by default use interp binning
+binning = 'interp';
 
 while iarg<=(length(varargin))
     switch varargin{iarg}
@@ -153,10 +154,10 @@ if (binType == 0) %----------INTERP ALGORITHM--------------------------------
     uniform_freq = uniform_freq/(sum(uniform_freq)*binSize);
     uniform_density = uniform_density/sum(uniform_density);
     
-    figure(100)
-    hold on
-    plot(uniform_angles,uniform_density,'r.-')
-    plot(bins,uniform_freq,'bo')
+%     figure(100)
+%     hold on
+%     plot(uniform_angles,uniform_density,'r.-')
+%     plot(bins,uniform_freq,'bo')
     
 
 else % ---------------------REBINNING ALGORITHM-------------------------------
@@ -206,10 +207,7 @@ if (hist == 1)
 end
 
 %% Calculate and bin misorientation angles for each input texture
-    %assert(binSize == (theta_max/length(bins)), 'something went wrong')
-    disp('Test')
-    binSize
-    theta_max/length(bins)
+
 if (blocks == 1)
     
     % find misorientation angle distribution
@@ -250,7 +248,7 @@ else
         disor_freq = histc(disorentation,bins);
 
         % normalise 
-        disor_freq = disor_freq/sum(disor_freq);
+        disor_freq = disor_freq/sum(disor_freq)*binSize;
         
         if (hist == 1)
             figure(i+1)
