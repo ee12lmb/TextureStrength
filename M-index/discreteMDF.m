@@ -1,4 +1,4 @@
-function [ theta, M, theta_max ] = discreteMDF(input_texture,CS)
+function [ theta, M, theta_max ] = discreteMDF(input_texture,crystal)
 %DISCRETEMDF calculates misorientation angles for all grains in
 %input_texture
 %   Takes either VPSC file path or texture cell array/matrix (depending on
@@ -31,7 +31,7 @@ setup_env
 if (ischar(input_texture) == 1)
     
     % if a file path is given then read in
-    [textures,ngrains,strain,blocks] = read_VPSC(input_texture);
+    [textures,ngrains,~,blocks] = read_VPSC(input_texture);
     
 elseif (iscell(input_texture) == 1)
     
@@ -57,14 +57,18 @@ else % texture now must be single matrix
     textures = input_texture;
     
     % ngrains is now just length of matrix
-    ngrains = length(textures);
+    [~,ngrains] = size(textures);
     
     % only one block of data
     blocks = 1;
     
 end
 
+% Look up symmetry for given crystal
+CS = lookupSym(crystal);
+
 %% Calculate outputs
+
 
 % find the maximum angle for this crystal symmetry
 [~,uniform_angles] = calcAngleDistribution(CS);
@@ -76,7 +80,7 @@ if (blocks == 1) % if texture only has one timestep
     
     % calculate 3x3 orientation matrix for each grain
     for i = 1:ngrains 
-        i
+   
         % separate out angles for ease
         phi1 = eulers_r(1,i);
         Phi  = eulers_r(2,i);
@@ -97,20 +101,14 @@ if (blocks == 1) % if texture only has one timestep
         g_tmp(3,3) = cos(Phi);
         
         g{i} = g_tmp; % store each orientation matrix in cell a cell in g
-         
-%          i
-%          g{i}
-%          inv(g{i})
-%          transpose(g{i})
-%          det(g{i})
-%         assert(all(all((inv(g{i}) - transpose(g{i})) < eps^2)), 'Not a rotation matrix!')
-%         assert((det(g{i})-1.0 < eps^2), 'Not a rotation metrix!')
+
     end
     
     % find misorientation angles for all grains
     Nangles = 1; % initialise counter for angles
     
     for i = 1:ngrains % loop over all grains
+      
         for j = i+1:ngrains % compare ith grain with all others after it
             
             
@@ -120,7 +118,7 @@ if (blocks == 1) % if texture only has one timestep
             M{Nangles} = M_tmp;
     
             % extract angle MIN angle given crystal symmetry
-            theta(Nangles) = calcDisorientation(M_tmp);
+            theta(Nangles) = calcDisorientation(M_tmp,crystal);
                         
             Nangles = Nangles + 1;
             
@@ -135,7 +133,7 @@ else % now deal with multiple textures (e.g. cell array)
     
         % calculate 3x3 orientation matrix for each grain
         for i = 1:ngrains 
-i
+
             % separate out angles for ease
             phi1 = eulers_r(1,i);
             Phi  = eulers_r(2,i);
@@ -170,7 +168,7 @@ i
                 M_tmp_array{Nangles} = M_tmp;
 
                 % extract MIN angle given crystal symmetry 
-                theta_tmp(Nangles) = calcDisorientation(M_tmp);
+                theta_tmp(Nangles) = calcDisorientation(M_tmp,crystal);
 
                 Nangles = Nangles + 1;
 

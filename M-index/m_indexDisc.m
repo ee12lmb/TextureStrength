@@ -154,10 +154,10 @@ if (binType == 0) %----------INTERP ALGORITHM--------------------------------
     uniform_freq = uniform_freq/(sum(uniform_freq)*binSize);
     uniform_density = uniform_density/sum(uniform_density);
     
-%     figure(100)
-%     hold on
-%     plot(uniform_angles,uniform_density,'r.-')
-%     plot(bins,uniform_freq,'bo')
+    figure(100)
+    hold on
+    plot(uniform_angles,uniform_density,'r.-')
+    plot(bins,uniform_freq,'bo')
     
 
 else % ---------------------REBINNING ALGORITHM-------------------------------
@@ -203,7 +203,7 @@ end
 if (hist == 1)
     figure(1)
     bar(bins,uniform_freq,'histc')
-    axis([0 140 0 0.025])
+    axis([0 180 0 0.025])
 end
 
 %% Calculate and bin misorientation angles for each input texture
@@ -211,7 +211,7 @@ end
 if (blocks == 1)
     
     % find misorientation angle distribution
-    [ disorentation, ~ ] = discreteMDF(textures,CS);
+    [ disorentation, ~ ] = discreteMDF(textures,crystal);
 
     % turn angle to degrees
     disorentation = disorentation/degree;
@@ -225,7 +225,7 @@ if (blocks == 1)
     if (hist == 1)
         figure(i+1)
         bar(bins,disor_freq,'histc')
-        axis([0 140 0 0.025]) 
+        axis([0 180 0 0.025]) 
     end
 
 
@@ -239,7 +239,7 @@ else
     for i = 1:blocks 
 
         % find misorientation angle distribution
-        [ disorentation, ~ ] = discreteMDF(textures{i},CS);
+        [ disorentation, ~ ] = discreteMDF(textures{i},crystal);
 
         % turn angle to degrees
         disorentation = disorentation/degree;
@@ -253,7 +253,7 @@ else
         if (hist == 1)
             figure(i+1)
             bar(bins,disor_freq,'histc')
-            axis([0 140 0 0.025]) 
+            axis([0 180 0 0.025]) 
         end
 
         %% Calculate M-index
