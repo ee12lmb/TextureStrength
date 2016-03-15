@@ -248,7 +248,7 @@ else
         disor_freq = histc(disorentation,bins);
 
         % normalise 
-        disor_freq = disor_freq/sum(disor_freq)*binSize;
+        disor_freq = disor_freq/(sum(disor_freq)*binSize);
         
         if (hist == 1)
             figure(i+1)
