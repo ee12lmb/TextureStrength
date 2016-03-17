@@ -143,7 +143,7 @@ end
 % angle of all of these
 for i = 1:length(SymOp)
     
-    rot_tmp   = orientation * SymOp{i};
+    rot_tmp = SymOp{i} * orientation;
     theta_tmp(i) = acos(((rot_tmp(1,1) + rot_tmp(2,2) + rot_tmp(3,3) - 1)/2));
     
 end
