@@ -17,9 +17,11 @@ switch lower(crystal)
         
     case 'quartz'
         
-        CS = crystalSymmetry('pointId', 18, [4.913 4.913 5.504],...
-            [90,90,120]*degree,'X||a*', 'Y||b', 'Z||c', 'mineral',...
-            'Quartz','color', 'red');
+%         CS = crystalSymmetry('pointId', 18, [4.913 4.913 5.504],...
+%             [90,90,120]*degree,'X||a*', 'Y||b', 'Z||c', 'mineral',...
+%             'Quartz','color', 'red');
+
+        CS = loadCIF('quartz');
         
     otherwise
         
