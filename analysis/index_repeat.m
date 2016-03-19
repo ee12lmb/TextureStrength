@@ -24,8 +24,9 @@ SS = specimenSymmetry('-1');
 crystal = 'olivine';
 bin = 1;
 binning = 'interp';
+verbose = 0; % by default dont print out progress
 
-while iarg<(length(varargin))
+while iarg<=(length(varargin))
     switch lower(varargin{iarg})
         
         % deal with filename flag-----------------------------------------
@@ -70,6 +71,10 @@ while iarg<(length(varargin))
             
             iarg = iarg + 1;
             binning = varargin{iarg};
+            
+        case '-v' % verbose - for printing out progress
+            
+            verbose = 1;
            
         %-----------------------------------------------------------------
         otherwise
@@ -130,6 +135,11 @@ ini_seed = seed; % capture initial seed for output file
 
 for i = 1:repeat % loop over index calculation as many times as requested
 
+    if (verbose == 1)
+        fprintf('Running iteration %i of %i...',i,repeat)
+        tic;
+    end
+    
     if (method == 0) % J-index
         [ index(i), ~] = j_index(textures,n,seed,'crystal',crystal);
         
@@ -142,6 +152,25 @@ for i = 1:repeat % loop over index calculation as many times as requested
     
     seed = seed + 1; % now sample with a different seed 
 
+    % case when we are using all grains
+    if (n == ngrains(1)) % no need to repeat as output will be the same
+        
+        if (verbose == 1)
+            disp('Max grains requested - all repeat values will be equal!')
+        end
+        
+        for j = 2:repeat          % loop over requested number of times
+            index(j) = index(1);  % can assign all repeat values equal
+        end
+        
+        break % break from repeat loop
+    end
+    
+    if (verbose == 1) 
+        time = toc;
+        fprintf('done (%f seconds)\n',time)
+    end
+    
 end
 
 %% Build output
