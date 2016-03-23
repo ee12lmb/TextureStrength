@@ -154,10 +154,10 @@ if (binType == 0) %----------INTERP ALGORITHM--------------------------------
     uniform_freq = uniform_freq/(sum(uniform_freq)*binSize);
     uniform_density = uniform_density/sum(uniform_density);
     
-    figure(100)
-    hold on
-    plot(uniform_angles,uniform_density,'r.-')
-    plot(bins,uniform_freq,'bo')
+%     figure(100)
+%     hold on
+%     plot(uniform_angles,uniform_density,'r.-')
+%     plot(bins,uniform_freq,'bo')
     
 
 else % ---------------------REBINNING ALGORITHM-------------------------------
@@ -236,7 +236,7 @@ if (blocks == 1)
 
 else
 
-    for i = 1:blocks 
+    parfor i = 1:blocks % run in parallel if available
 
         % find misorientation angle distribution
         [ disorentation, ~ ] = discreteMDF(textures{i},crystal);
