@@ -21,7 +21,9 @@ switch lower(crystal)
 %             [90,90,120]*degree,'X||a*', 'Y||b', 'Z||c', 'mineral',...
 %             'Quartz','color', 'red');
 
+        % histograms for this agree with Wheeler (2001)
         CS = loadCIF('quartz');
+        
         
     otherwise
         
