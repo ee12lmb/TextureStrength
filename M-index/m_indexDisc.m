@@ -1,4 +1,4 @@
-function [ m,strain,disor_freq ] = m_indexDisc(input_texture,n,seed,varargin)
+function [ m, strain, disor_freq, h ] = m_indexDisc(input_texture,n,seed,varargin)
 %M_INDEXDISC calculates the M-index using a discrete method
 %   Takes either a VPSC file path or a cell array/matrix of a texture that
 %   has already been read in (see read_VPSC).
@@ -27,7 +27,7 @@ setup_env;
 iarg = 1;
 wantout = 1; % we don't want output unless the 'filename' flag is active
 
-% setup defautlts (olivine, 1 degree bins)
+% setup defautlts if no options are specified
 CS = crystalSymmetry('Pbnm', [4.75, 10.20, 5.98]);
 SS = specimenSymmetry('-1');
 crystal = 'olivine';
@@ -35,6 +35,8 @@ binSize = 1;
 hist = 0;
 binType = 0; % by default use interp binning
 binning = 'interp';
+par = 0; % by default dont run in parallel
+h = 'Histograms not requested';
 
 while iarg<=(length(varargin))
     switch varargin{iarg}
@@ -63,6 +65,7 @@ while iarg<=(length(varargin))
         case 'hist' % will plot histograms at all time steps
             
             hist = 1;
+            clear h   % clear the default string from h
             disp('Plotting histograms...')
             
         case 'binning'
@@ -79,6 +82,10 @@ while iarg<=(length(varargin))
                     error('Unrecognised binning algorithm')
             end
             
+        case 'parallel'
+            
+             par = 1;
+             disp('Attempting to run in parallel...')            
              
         otherwise
             error('Unknown flag')
@@ -86,6 +93,10 @@ while iarg<=(length(varargin))
     iarg = iarg + 1;
 end
 
+if (par == hist) 
+    assert((par == 0),...
+               'Cannot plot histograms while running in parallel')
+end
 
 % determine input type and extract relevant information
 [ textures, strain, blocks, input_texture, output ] = get_inputInfo(input_texture,n,seed,crystal);
@@ -108,8 +119,7 @@ uniform_angles = uniform_angles/degree;
 
 % calculate bin dimensions (here set to one degree - *could take input?*)
 bins = linspace(0,theta_max,((1/binSize)*theta_max)+1);
-%mid_bin = bins + 0.5*binSize;
-%mid_bin(length(mid_bin)) = bins(length(bins));
+
 
 if (binType == 0) %----------INTERP ALGORITHM--------------------------------
     
@@ -201,8 +211,10 @@ else % ---------------------REBINNING ALGORITHM-------------------------------
 end
 
 if (hist == 1)
-    figure(1)
+    h{1} = figure(1);
     bar(bins,uniform_freq,'histc')
+    hold on 
+    plot(bins,uniform_freq,'r-')
     axis([0 180 0 0.025])
 end
 
@@ -223,8 +235,10 @@ if (blocks == 1)
     disor_freq = disor_freq/(sum(disor_freq)*binSize);
     
     if (hist == 1)
-        figure(i+1)
+        h{i+1} = figure(i+1);
         bar(bins,disor_freq,'histc')
+        hold on    
+        plot(bins,uniform_freq,'r-')
         axis([0 180 0 0.025]) 
     end
 
@@ -235,35 +249,66 @@ if (blocks == 1)
     m = (binSize/2)*sum(abs(uniform_freq - disor_freq));
 
 else
+    
+    if (par == 1)
+        parfor i = 1:blocks % run in parallel if available
 
-    parfor i = 1:blocks % run in parallel if available
+            % find misorientation angle distribution
+            [ disorentation, ~ ] = discreteMDF(textures{i},crystal);
 
-        % find misorientation angle distribution
-        [ disorentation, ~ ] = discreteMDF(textures{i},crystal);
+            % turn angle to degrees
+            disorentation = disorentation/degree;
 
-        % turn angle to degrees
-        disorentation = disorentation/degree;
+            % bin angles
+            disor_freq = histc(disorentation,bins);
 
-        % bin angles
-        disor_freq = histc(disorentation,bins);
+            % normalise 
+            disor_freq = disor_freq/(sum(disor_freq)*binSize);
 
-        % normalise 
-        disor_freq = disor_freq/(sum(disor_freq)*binSize);
-        
-        if (hist == 1)
-            figure(i+1)
-            bar(bins,disor_freq,'histc')
-            axis([0 180 0 0.025]) 
+
+            %% Calculate M-index
+
+            %m(i) = (theta_max/(length(bins))*sum((abs(uniform_freq - disor_freq))/2);
+            %m(i) = (theta_max/(2*length(bins)))*sum(abs(uniform_freq - disor_freq));
+            m(i) = (binSize/2)*sum(abs(uniform_freq - disor_freq));
+
         end
+        
+    else % don't run in parallel
+        
+        
+        for i = 1:blocks 
 
-        %% Calculate M-index
+            % find misorientation angle distribution
+            [ disorentation, ~ ] = discreteMDF(textures{i},crystal);
 
-        %m(i) = (theta_max/(length(bins))*sum((abs(uniform_freq - disor_freq))/2);
-        %m(i) = (theta_max/(2*length(bins)))*sum(abs(uniform_freq - disor_freq));
-        m(i) = (binSize/2)*sum(abs(uniform_freq - disor_freq));
+            % turn angle to degrees
+            disorentation = disorentation/degree;
 
+            % bin angles
+            disor_freq = histc(disorentation,bins);
+
+            % normalise 
+            disor_freq = disor_freq/(sum(disor_freq)*binSize);
+
+            if (hist == 1)
+                h{i+1} = figure(i+1)
+                bar(bins,disor_freq,'histc')
+                hold on    
+                plot(bins,uniform_freq,'r-')
+                axis([0 180 0 0.025]) 
+            end
+
+            %% Calculate M-index
+
+            %m(i) = (theta_max/(length(bins))*sum((abs(uniform_freq - disor_freq))/2);
+            %m(i) = (theta_max/(2*length(bins)))*sum(abs(uniform_freq - disor_freq));
+            m(i) = (binSize/2)*sum(abs(uniform_freq - disor_freq));
+
+        end
+        
     end
-
+    
 end
 
 
