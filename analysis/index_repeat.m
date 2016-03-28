@@ -1,9 +1,57 @@
 function [ index ] = index_repeat(input_texture,step,n,repeat,seed,varargin)
 %INDEX_REPEAT Calculates a given texture index a number of times
+%
 %   A specified texture index (see inputs) is calculated 'repeat' number of
-%   times using 'n' number of samples. For each calculation a different
+%   times using 'n' number of grains. For each calculation a different
 %   seed is used (beginning at the initial 'seed') resulting in a new
-%   random 'n' samples (with replacement).
+%   random 'n' samples - essentially sampling with replacement.
+%
+%   Inputs:  input_texture - file path of VPSC or EBSD (*.ctf) data
+%                            OR matrix/cell array of euler angles
+%            step          - specifies which strain step to calculate the
+%                            index if multiple steps are present
+%            n             - number of grains to pull from texture
+%            repeat        - the number of times to calculate the index,
+%                            sampling with replacement
+%            seed          - allows repeatability, i.e. generates the same
+%                            'random' samples if set equal to previous run
+%
+%   Outputs: index         - a vector of length 'repeat' containing all
+%                            index values calculated
+%
+%   Optional arguments...
+%
+%   'crystal'  - specifies the crystal symmetry to use, must be followed 
+%                by a recognised crystal name e.g. ...'crystal','quartz'.
+%                Accepted crystal names: 'olivine','quartz',
+%                'post-perovskite'
+%
+%   'index'    - specifies the index to use in the calculation. Must be
+%                followed by a valid index name e.g. ...'index','j'.
+%                Possible index names are;
+%
+%                'j'  - J-index
+%                'mc' - Continuous M-index
+%                'md' - Discrete M-index
+%
+%   'bin'      - if 'md' option is selected, this specifies the bin width,
+%                in degrees. Must be followed a number > 0 e.g. ...'bin',0.5
+%
+%   'binning'  - if 'md' option is selected, specifies the binning
+%                algorithm, possible options are 'interp' or 'rebin', e.g.
+%                ...'binning','interp'
+%
+%   'outfile'  - will output data to file specified, including meta data in
+%                headers e.g. ...'outfile','PATH'
+%
+%   '-v'       - verbose, will output progress
+%
+%   Lewis Bailey - University of Leeds, School of Earth and Environment 
+%   2015-16 Undergraduate final year project
+%
+%   Usage: [ index ] = index_repeat(input_texture,step,n,repeat,seed,varargin)
+%
+%   See also: J_INDEX, M_INDEXDISC, M_INDEXCONT
 
 
 tic;

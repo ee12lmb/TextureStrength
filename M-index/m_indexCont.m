@@ -1,10 +1,12 @@
 function [ m, strain ] = m_indexCont(input_texture,n,seed,varargin)
 %M_INDEXCONT returns m index and strain vector for an input texture 
 %   Takes either a VPSC file path or a cell array/matrix of a texture that
-%   has already been read in (see read_VPSC).
+%   has already been read in (see read_VPSC). Input can also be an EBSD file
+%   (*.ctf). 
 %
-%   Inputs:  input_texture - file path/texture array/texture matrix 
-%            n             - number of samples to pull from texture
+%   Inputs:  input_texture - file path of VPSC or EBSD (*.ctf) data
+%                            OR matrix/cell array of euler angles
+%            n             - number of grains to pull from texture
 %            seed          - allows repeatability, i.e. generates the same
 %                            'random' samples if set equal to previous run
 %
@@ -13,7 +15,23 @@ function [ m, strain ] = m_indexCont(input_texture,n,seed,varargin)
 %            strain        - strain vector if input is file path (otherwise
 %                            this is known before function call)
 %
+%   Optional arguments...
+%
+%   m = M_INDEXCONT(input,n,seed,'crystal',CRYSTAL) will calculate the
+%   continuous M-index using the theoretical random distribution for a 
+%   specified crystal symmetry. CRYSTAL can be; 'olivine','quartz' or
+%   'post-perovskite'. The default is 'olivine'.
+%
+%   m = M_INDEXCONT(input,n,seed,'outfile',PATH) will output to the file
+%   specified by PATH (should be a string). The output will include meta
+%   data in headers.
+%
+%   Lewis Bailey - University of Leeds, School of Earth and Environment 
+%   2015-16 Undergraduate final year project
+%
 %   Usage: [ m, strain ] = m_indexCont(input_texture,n,seed)
+%
+%   See also: J_INDEX, M_INDEXDISC, INDEX_REPEAT
 
 tic;
 t = clock;

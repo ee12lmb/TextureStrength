@@ -11,6 +11,11 @@ function [ eulers, CS, phase_names ] = read_EBSD(filename,crystal)
 %            CS          - Cell array of crystal symmetries from .ctf
 %            phase_names - list of phases present in the file
 %
+%   Lewis Bailey - University of Leeds, School of Earth and Environment 
+%   2015-16 Undergraduate final year project
+%
+%   get_symmetry is a modified function originally written by ******
+%
 %   Usage: [ eulers, CS, phase_names ] = read_EBSD(filename,crystal)
 
 
