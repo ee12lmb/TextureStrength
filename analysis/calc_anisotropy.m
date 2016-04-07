@@ -1,4 +1,4 @@
-function [ uA, lmA ] = calc_anisotropy(input_texture,n,seed,varargin)
+function [ uA, lmA, strain ] = calc_anisotropy(input_texture,n,seed,varargin)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -6,6 +6,12 @@ function [ uA, lmA ] = calc_anisotropy(input_texture,n,seed,varargin)
 
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
 setup_env;
+
+
+% Setup defaults if no options given
+crystal = 'quartz';
+CS = lookupSym(crystal);
+
 
 iarg = 1;
 while iarg<(length(varargin))
@@ -25,6 +31,12 @@ while iarg<(length(varargin))
             
             iarg = iarg + 1; % take next argument
             crystal = varargin{iarg};
+            
+            switch crystal
+                case 'post-perovskite'
+                    crystal = 'llm_mgsio3ppv';
+            end
+            
             CS = lookupSym(crystal);
             
         otherwise
@@ -33,8 +45,10 @@ while iarg<(length(varargin))
     iarg = iarg + 1;
 end
 
+fprintf('\nReading data...')
 % determine input type and extract relevant information
 [ textures, strain, blocks, input_texture, output ] = get_inputInfo(input_texture,n,seed,crystal);
+fprintf('done\n')
 
 %% Calculate elasticity measures
 
@@ -64,6 +78,11 @@ if (blocks == 1)  % we only have one strain step
 else  % we have multiple strain steps
     
     for b = 1:blocks
+        
+        tic;
+        fprintf('Calculating block %i...',b)
+        
+
         % copy and roate this elasticity to align with each crystal
         Cs = zeros(6,6,n);
         for i = 1:n
@@ -72,18 +91,21 @@ else  % we have multiple strain steps
 
         % the next step is to average the elasticity of each grain:
 
-        rhos = ones(nxtls,1)*rho_single; % All crystals have the same density.
-        vfs  = ones(nxtls,1);            % Same volume fraction for each point
+        rhos = ones(n,1)*rho_single; % All crystals have the same density.
+        vfs  = ones(n,1);            % Same volume fraction for each point
 
         % normalised by MS_VRH.
         [C_poly_av, rh_poly_av] = MS_VRH(vfs, Cs, rhos);
 
         % The question is how anisotropic is C_poly_av. The two most useful measures are given by:
 
-        [ uA(i), lmA(i) ] = MS_anisotropy( C_poly_av );
+        [ uA(b), lmA(b) ] = MS_anisotropy( C_poly_av );
+        
+        t = toc;
+        fprintf('done (%f seconds)\n',t)
         
     end
-    
+
 
 end
 
