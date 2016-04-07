@@ -96,6 +96,45 @@ switch type
         % read in data
         data = fscanf(fid, '%g', [length 1]);
         
+    case 'AN3'
+        
+        for i = 1:10 % capture headers
+            header_tmp{i} = fgetl(fid);
+        end
+        
+        % extract useful header info
+        fname     = textscan(header_tmp{4},'%s %s %s');
+        xtal      = textscan(header_tmp{5},'%s %s');
+        numgrains = textscan(header_tmp{6},'%s %d %s %s %s %s');
+        
+        header{1} = fname{3};
+        header{2} = xtal{2};
+        header{3} = numgrains{2};
+        
+        % read in data
+        data = fscanf(fid, '%g %g %g', [3 length]);
+        data = data';
+        
+     case 'AN2'
+        
+        for i = 1:10 % capture headers
+            header_tmp{i} = fgetl(fid);
+        end
+        
+        % extract useful header info
+        fname     = textscan(header_tmp{4},'%s %s %s');
+        xtal      = textscan(header_tmp{5},'%s %s');
+        numgrains = textscan(header_tmp{6},'%s %d %s %s %s %s');
+        
+        header{1} = fname{3};
+        header{2} = xtal{2};
+        header{3} = numgrains{2};
+        
+        % read in data
+        data = fscanf(fid, '%g %g', [2 length]);
+        data = data';
+        
+        
     otherwise 
         error('Input file type not recognised')
 end
