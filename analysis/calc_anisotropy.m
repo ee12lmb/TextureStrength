@@ -10,8 +10,6 @@ setup_env;
 
 % Setup defaults if no options given
 crystal = 'quartz';
-CS = lookupSym(crystal);
-
 
 iarg = 1;
 while iarg<(length(varargin))
@@ -37,7 +35,6 @@ while iarg<(length(varargin))
                     crystal = 'llm_mgsio3ppv';
             end
             
-            CS = lookupSym(crystal);
             
         otherwise
             error('Unknown flag')
@@ -80,7 +77,7 @@ else  % we have multiple strain steps
     for b = 1:blocks
         
         tic;
-        fprintf('Calculating block %i...',b)
+        fprintf('Calculating block %i of %i...',b,blocks)
         
 
         % copy and roate this elasticity to align with each crystal
