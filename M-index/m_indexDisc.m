@@ -3,9 +3,8 @@ function [ m, strain, disor_freq, h ] = m_indexDisc(input_texture,n,seed,varargi
 %
 %   Takes either a VPSC or EBSD (*.ctf) file path, or a cell array/matrix
 %   of a texture that has already been read in. The M-index is calulated
-%   using the method outlined by Skemer et al (2005) **ADD REF**.
-%   M_INDEXDISC will also return a strain vector if the input is a VPSC
-%   file.
+%   using the method outlined by Skemer et al (2005). M_INDEXDISC will 
+%   also return a strain vector if the input is a VPSC file.
 %
 %   Inputs:  input_texture - file path/texture array/texture matrix 
 %            n             - number of grains to use
@@ -13,7 +12,7 @@ function [ m, strain, disor_freq, h ] = m_indexDisc(input_texture,n,seed,varargi
 %                            'random' samples if set equal to previous run
 %
 %   Outputs: m             - the M-index as calculated by the discrete
-%                            method as outlined by Skemer (REF)
+%                            method as outlined by Skemer (2005)
 %            strain        - strain vector if input is VPSC 
 %            disor_freq    - matrix or cell array containing the calculated
 %                            misorientation angles (disorientation, Grimmer
@@ -48,6 +47,13 @@ function [ m, strain, disor_freq, h ] = m_indexDisc(input_texture,n,seed,varargi
 %
 %   Lewis Bailey - University of Leeds, School of Earth and Environment 
 %   2015-16 Undergraduate final year project
+%
+%   References
+%
+%   Skemer, P., Katayama, B., Jiang, Z. and Karato, S. (2005). "The 
+%   misorientation index: Development of a new method for calculating the 
+%   strength of lattice-preferred orientation". Tectonophysics, 411(1-4), 
+%   pp. 157–167. doi:10.1016/j.tecto.2005.08.023.
 %
 %   Usage: [ m, strain, disor_freq, h ] = m_indexDisc(input_texture,n,seed,...)
 %
