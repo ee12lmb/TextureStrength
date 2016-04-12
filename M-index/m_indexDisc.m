@@ -1,48 +1,87 @@
 function [ m, strain, disor_freq, h ] = m_indexDisc(input_texture,n,seed,varargin)
-%M_INDEXDISC calculates the M-index using a discrete method
-%   Takes either a VPSC file path or a cell array/matrix of a texture that
-%   has already been read in (see read_VPSC).
+%M_INDEXDISC returns discrete M-index and strain vector for an input texture
+%
+%   Takes either a VPSC or EBSD (*.ctf) file path, or a cell array/matrix
+%   of a texture that has already been read in. The M-index is calulated
+%   using the method outlined by Skemer et al (2005) **ADD REF**.
+%   M_INDEXDISC will also return a strain vector if the input is a VPSC
+%   file.
 %
 %   Inputs:  input_texture - file path/texture array/texture matrix 
-%            CS            - crystal symmetry
-%            n             - number of samples to pull from texture
+%            n             - number of grains to use
 %            seed          - allows repeatability, i.e. generates the same
 %                            'random' samples if set equal to previous run
 %
 %   Outputs: m             - the M-index as calculated by the discrete
 %                            method as outlined by Skemer (REF)
-%            strain        - strain vector if input is file path (otherwise
-%                            this is known before function call)
+%            strain        - strain vector if input is VPSC 
+%            disor_freq    - matrix or cell array containing the calculated
+%                            misorientation angles (disorientation, Grimmer
+%                            1979)
+%            h             - figure handles for any hisograms plotted (see
+%                            optional arguments)
 %
-%   Usage: [ m, strain ] = m_indexDisc(input_texture,n,seed)
+%   Optional arguments...
+%
+%   'crystal'  - specfies the crystal symmetry to use, must be followed by a
+%                supported crystal symmetry, e.g. 'crystal','quartz'
+%
+%                supported symmetries: 'olivine', 'quartz',
+%                'post-perovskite'
+%
+%   'bin'      - used to set the bin width, in degrees. Must be followed by
+%                a number greater than zero e.g. 'bin',0.5
+%
+%   'binning'  - sets the binning algorithm to use. Must be followed by
+%                either 'interp' or 'rebin' e.g. 'binning','interp'
+%                (see comments for details)
+%
+%   'outfile'  - must be followed by a file path indicating where to dump
+%                output text file. Text file includes headers giving meta
+%                data information e.g. no. grains, bin width etc.
+%
+%   'parallel' - if multiple time steps are present, attempt to run in
+%                parallel using parfor. Cannot be used with 'hist' option
+%
+%   'hist'     - will plot histograms of misorientation angle distributions
+%                and return the handles to h (see outputs).
+%
+%   Lewis Bailey - University of Leeds, School of Earth and Environment 
+%   2015-16 Undergraduate final year project
+%
+%   Usage: [ m, strain, disor_freq, h ] = m_indexDisc(input_texture,n,seed,...)
+%
+%   See also: M_INDEXCONT, J_INDEX, DISCRETEMDF, CALCDISORIENTATION
 
 tic;
 t = clock;
 %% Setup & read data
 
+% setup environment if not already set
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
 setup_env;
 
-% check for optional arguments
-iarg = 1;
-wantout = 1; % we don't want output unless the 'filename' flag is active
+% ==============================OPTIONS===================================
+iarg = 1; % argument counter
 
-% setup defautlts if no options are specified
-CS = crystalSymmetry('Pbnm', [4.75, 10.20, 5.98]);
-SS = specimenSymmetry('-1');
-crystal = 'olivine';
-binSize = 1;
-hist = 0;
-binType = 0; % by default use interp binning
-binning = 'interp';
-par = 0; % by default dont run in parallel
-h = 'Histograms not requested';
+% ------------------------------Defaults---------------------------------
+wantout = 1;                                          % no output 
+CS = crystalSymmetry('Pbnm', [4.75, 10.20, 5.98]);    % olivine symmetry
+SS = specimenSymmetry('-1');                          
+crystal = 'olivine';                                  % olivine crystal
+binSize = 1;                                          % 1 degree bin
+hist = 0;                                             % dont plot hists
+binType = 0;                                          % interp algorithm
+binning = 'interp';                                   % interp algorithm
+par = 0;                                              % dont run in parallel
+h = 'Histograms not requested';                       % h when no histograms
 
+% loop through arguments
 while iarg<=(length(varargin))
     switch varargin{iarg}
         case 'outfile'
             
-            iarg = iarg + 1; % take next argument as filename 
+            iarg = iarg + 1;              % take next argument as filename 
             outfile = varargin{iarg};
            
             % check that we are not overwriting a file
@@ -51,11 +90,11 @@ while iarg<=(length(varargin))
            
             wantout = 0;  % we do want the output to file
             
-         case 'crystal'  % find the appropriate symmetry 
+         case 'crystal' % find the appropriate symmetry 
             
             iarg = iarg + 1; % take next argument
             crystal = varargin{iarg};
-            CS = lookupSym(crystal);
+            CS = lookupSym(crystal); % get symmetry object
             
         case 'bin' % sets bin size
             
@@ -68,7 +107,7 @@ while iarg<=(length(varargin))
             clear h   % clear the default string from h
             disp('Plotting histograms...')
             
-        case 'binning'
+        case 'binning' % chose binning algorithm
             
             iarg = iarg + 1;
             binning = varargin{iarg};
@@ -82,7 +121,7 @@ while iarg<=(length(varargin))
                     error('Unrecognised binning algorithm')
             end
             
-        case 'parallel'
+        case 'parallel' % will run in parallel
             
              par = 1;
              disp('Attempting to run in parallel...')            
@@ -114,10 +153,9 @@ theta_max = uniform_angles(length(uniform_angles));
 % turn to degrees
 theta_max = theta_max/degree;
 uniform_angles = uniform_angles/degree;
-%uniform_density = uniform_density/sum(uniform_density);
 
-
-% calculate bin dimensions (here set to one degree - *could take input?*)
+% calculate bin dimensions
+assert((binSize > 0),'Bin size must be greater than zero')
 bins = linspace(0,theta_max,((1/binSize)*theta_max)+1);
 
 
@@ -138,6 +176,7 @@ if (binType == 0) %----------INTERP ALGORITHM--------------------------------
             % found 1st MTEX angle that is bigger than current bin
             if (bins(i) < uniform_angles(j)) 
                 
+                % found the points either side
                 up = uniform_angles(j);
                 low = uniform_angles(j-1);
                 
@@ -163,11 +202,6 @@ if (binType == 0) %----------INTERP ALGORITHM--------------------------------
     % normalise
     uniform_freq = uniform_freq/(sum(uniform_freq)*binSize);
     uniform_density = uniform_density/sum(uniform_density);
-    
-%     figure(100)
-%     hold on
-%     plot(uniform_angles,uniform_density,'r.-')
-%     plot(bins,uniform_freq,'bo')
     
 
 else % ---------------------REBINNING ALGORITHM-------------------------------
@@ -220,7 +254,7 @@ end
 
 %% Calculate and bin misorientation angles for each input texture
 
-if (blocks == 1)
+if (blocks == 1) % only one strain step
     
     % find misorientation angle distribution
     [ disorentation, ~ ] = discreteMDF(textures,crystal);
@@ -235,7 +269,7 @@ if (blocks == 1)
     disor_freq = disor_freq/(sum(disor_freq)*binSize);
     
     if (hist == 1)
-        h{i+1} = figure(i+1);
+        h{2} = figure(2);
         bar(bins,disor_freq,'histc')
         hold on    
         plot(bins,uniform_freq,'r-')
@@ -243,12 +277,10 @@ if (blocks == 1)
     end
 
 
-    %% Calculate M-index
-    %m = (theta_max/(length(bins))*sum((abs(uniform_freq - disor_freq))/2);
-    %m = (theta_max/(2*length(bins)))*sum(abs(uniform_freq - disor_freq));
+    % Calculate M-index
     m = (binSize/2)*sum(abs(uniform_freq - disor_freq));
 
-else
+else % multiple strain steps
     
     if (par == 1)
         parfor i = 1:blocks % run in parallel if available
@@ -266,10 +298,7 @@ else
             disor_freq = disor_freq/(sum(disor_freq)*binSize);
 
 
-            %% Calculate M-index
-
-            %m(i) = (theta_max/(length(bins))*sum((abs(uniform_freq - disor_freq))/2);
-            %m(i) = (theta_max/(2*length(bins)))*sum(abs(uniform_freq - disor_freq));
+            % Calculate M-index
             m(i) = (binSize/2)*sum(abs(uniform_freq - disor_freq));
 
         end
@@ -279,6 +308,8 @@ else
         
         for i = 1:blocks 
 
+            fprintf('Calculating strain step: %i',i)
+            
             % find misorientation angle distribution
             [ disorentation, ~ ] = discreteMDF(textures{i},crystal);
 
@@ -292,17 +323,14 @@ else
             disor_freq = disor_freq/(sum(disor_freq)*binSize);
 
             if (hist == 1)
-                h{i+1} = figure(i+1)
+                h{i+1} = figure(i+1);
                 bar(bins,disor_freq,'histc')
                 hold on    
                 plot(bins,uniform_freq,'r-')
                 axis([0 180 0 0.025]) 
             end
 
-            %% Calculate M-index
-
-            %m(i) = (theta_max/(length(bins))*sum((abs(uniform_freq - disor_freq))/2);
-            %m(i) = (theta_max/(2*length(bins)))*sum(abs(uniform_freq - disor_freq));
+            % Calculate M-index
             m(i) = (binSize/2)*sum(abs(uniform_freq - disor_freq));
 
         end
@@ -312,7 +340,7 @@ else
 end
 
 
-%% Build output to file (if requested *NEEDS WORK*)
+%% Build output to file (if requested)
 
 time = toc;
 
