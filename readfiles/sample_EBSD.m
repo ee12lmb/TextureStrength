@@ -1,5 +1,6 @@
 function [ sampled_texture, ngrains ] = sample_EBSD(infile,crystal,n,seed)
 %SAMPLE_EBSD Returns a random sample of Euler angles from EBSD file
+%
 %   Uses read_EBSD to get Euler angles from an EBSD (.ctf) file for a
 %   specific crystal phase defined by 'crystal'. This martix of Euler
 %   angles is then passed to sample_texture to return a matrix of n
@@ -13,6 +14,12 @@ function [ sampled_texture, ngrains ] = sample_EBSD(infile,crystal,n,seed)
 %   Outputs:    sampled_texture - the sampled texture
 %               ngrains         - number of grains in the whole sample
 %
+%   Lewis Bailey - University of Leeds, School of Earth and Environment 
+%   2015-16 Undergraduate final year project
+%
+%   Usage: [ sampled_texture, ngrains ] = sample_EBSD(infile,crystal,n,seed)
+%
+%   See also: READ_EBSD, SAMPLE_TEXTURE
 
 
 %% Setup envrionment

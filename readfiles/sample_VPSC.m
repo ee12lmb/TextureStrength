@@ -1,18 +1,31 @@
 function [sample_texture,ngrains,strain,blocks] = sample_VPSC(infile,n,seed)
 % SAMPLE_VPSC randomly samples from an input VPSC file
-%   Randomly pulls n samples from the VPSC input file. Seed ensures
-%   repeatability (i.e. the same samples will be extracted)
 %
-%   Returns the same format as read_VPSC
+%   Input texture (VPSC file path) is read in using read_VPSC. Following
+%   this, n random grains (without replacement) are taken from the total of
+%   N Euler angle sets. Meta data is also returned.
+%
+%   Inputs:  infile          - VPSC file path
+%            n               - number of grains to sample
+%            seed            - set the same to repeat the same random no.s
+%
+%   Outputs: sample_texture  - nx3 matrix of sampled Euler angles
+%            ngrains         - total number of grains in the sample N
+%            strain          - vector of strain at each step
+%            blocks          - number of strain stesps
+%
+%   Lewis Bailey - University of Leeds, School of Earth and Environment 
+%   2015-16 Undergraduate final year project
+%
+%   Usage: [sample_texture,ngrains,strain,blocks] = sample_VPSC(infile,n,seed)
+%
+%   See also: READ_VPSC, SAMPLE_TEXTURE, READ_EBSD, SAMPLE_EBSD
 
 
 %% Read VPSC & set up sample index
 
-% % add path to read files
-% addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles/
-
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
-setup_env
+setup_env;
 
 % Read whole data file
 [textures,nxtl,strain,blocks] = read_VPSC(infile);

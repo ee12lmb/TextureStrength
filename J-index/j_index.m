@@ -1,20 +1,45 @@
 function [ J, strain ] = j_index(input_texture,n,seed,varargin)
 %J_INDEX calculates the J index for a specified number of grains
-%   A number of grains (n) are selected at random from either an input file
-%   or a texture array already inputted into matlab (see read_VPSC). The
-%   J-index is then calculated for each time step.
 %
-%   Inputs:  input_texture - file path/texture array/texture matrix
-%                        n - number of grains to use
-%                     seed - allows repeatability of 'random' numbers
+%   Takes input texture as either a VPSC or EBSD (*.ctf) file path, 
+%   or a cell array/matrix of a Euler angles that has already been read in, 
+%   randomly sampling n grains (without replacement). 
 %
-%            OPTIONAL: 'filename','[ name out output file ]'
-%                          - specify location to dump data to file
+%   Inputs:  input_texture - file path of VPSC or EBSD (*.ctf) data
+%                            OR matrix/cell array of euler angles
+%            n             - number of grains to pull from texture
+%            seed          - allows repeatability, i.e. generates the same
+%                            'random' samples if set equal to previous run
 %
-%   Outputs:             J - either single value/vector of J-index values
-%                   strain - if read from file, will be vector of strains
+%   Outputs: J             - the J-index as calculated by the continuous
+%                            function method outlined in Mainprice (2014)
+%            strain        - strain vector if input is file path (otherwise
+%                            this is known before function call)
 %
-%   Usage: [ J, strain ] = j_index(input_texture,n,seed,varargin)
+%   Optional arguments...
+%
+%   j = J_INDEX(input,n,seed,'crystal',CRYSTAL) will calculate the
+%   continuous J-index using the theoretical random distribution for a 
+%   specified crystal symmetry. CRYSTAL can be; 'olivine','quartz' or
+%   'post-perovskite'. The default is 'olivine'.
+%
+%   j = J_INDEX(input,n,seed,'outfile',PATH) will output to the file
+%   specified by PATH (should be a string). The output will include meta
+%   data in headers.
+%
+%   Lewis Bailey - University of Leeds, School of Earth and Environment 
+%   2015-16 Undergraduate final year project
+%
+%   References
+%
+%   Mainprice, D., Bachmann, F., Hielscher, R. and Schaeben, H. (2014).
+%   "Descriptive tools for the analysis of texture projects with large
+%   datasets using MTEX: strength, sym- metry and components". Geological
+%   Society, London, Special Publications, 409. doi: 10.1144/SP409.8.
+%
+%   Usage: [ j, strain ] = j_index(input_texture,n,seed,...)
+%
+%   See also: M_INDEXCONT, M_INDEXDISC, INDEX_REPEAT
 
 tic;
 t = clock;

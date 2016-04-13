@@ -1,12 +1,13 @@
 function [ eulers, CS, phase_names ] = read_EBSD(filename,crystal)
 %READ_EBSD extracts Euler angles for specific crystals from EBSD
+%
 %   Given the path of a .ctf EBSD file, read_EBSD will extract the Euler
 %   angles for the phase defined by 'crystal'. It returns them in degrees.
 %
 %   Input:   filename    - file path to .ctf file
 %            crystal     - which phase to extract Euler angles for
 %
-%   Outputs: eulers      - Nx3 matrix containing Euler angles for each pixel 
+%   Outputs: eulers      - Nx3 matrix containing Euler angles for each grain 
 %                          in the form (phi_1,Phi,phi_2)
 %            CS          - Cell array of crystal symmetries from .ctf
 %            phase_names - list of phases present in the file
@@ -14,9 +15,11 @@ function [ eulers, CS, phase_names ] = read_EBSD(filename,crystal)
 %   Lewis Bailey - University of Leeds, School of Earth and Environment 
 %   2015-16 Undergraduate final year project
 %
-%   get_symmetry is a modified function originally written by ******
+%   get_symmetry is a modified function originally from https://github.com/earall/EBSD_Melts
 %
 %   Usage: [ eulers, CS, phase_names ] = read_EBSD(filename,crystal)
+%
+%   See also: SAMPLE_EBSD, SAMPLE_TEXTURE
 
 
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/

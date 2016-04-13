@@ -1,16 +1,28 @@
 function [sample_texture,blocks,ngrains] = sample_texture(textures,n,seed)
-%SAMPLE_TEXTURE randomly samples from a texutre imported by read_VPSC
-%   Function allows sampling without the need to read a texture in again.
-%   To repeat a sample, specify the same seed as previously ran.
-%                                         
-%   Inputs: texture - array or cell array of euler angles read in by
-%                     read_VPSC.
-%           n       - number of samples to pull out (cannot be bigger than
-%                     the total in the sample).
-%           seed    - sets the random number generator to a certain state
-%                     to allow for repeatability. 
+%SAMPLE_TEXTURE randomly samples from a texutre already loaded into matlab
 %
-%   Outputs: sample - randomly sampled texture of length n
+%   SAMPLE_TEXTURE allows resampling without the need to read a texture in
+%   again. To repeat a sample, specify the same seed as previously ran.
+%   Samples are taken without replacement.
+%                                         
+%   Inputs:  texture        - array or cell array of euler angles read in by
+%                             read_VPSC or read_EBSD
+%            n              - number of samples to pull out (cannot be bigger than
+%                             the total in the sample).
+%            seed           - sets the random number generator to a certain state
+%                             to allow for repeatability. 
+%
+%   Outputs: sample_texture - set of randomly samples Euler angles of
+%                             length n
+%            blocks         - number of strain steps 
+%            ngrains        - number of total grains in sample
+%
+%   Lewis Bailey - University of Leeds, School of Earth and Environment 
+%   2015-16 Undergraduate final year project
+%
+%   Usage: [sample_texture,blocks,ngrains] = sample_texture(textures,n,seed)
+%
+%   See also: READ_VPSC, READ_EBSD, SAMPLE_VPSC, SAMPLE_EBSD, GET_INPUTINFO
 
 %% Input checks
 

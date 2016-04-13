@@ -36,6 +36,8 @@ function [ strain ] = get_strain(index_input,varargin)
 %   2015-16 Undergraduate final year project
 %
 %   Usage: [ strain ] = GET_STRAIN(infile,varargin)
+%
+%   See also: READ_TEXOUT, CALC_ANISOTROPY, INDEX_REPEAT
 
 
 %% Setup and read data
@@ -61,6 +63,13 @@ while iarg<=(length(varargin))
         case 'crystal'
             iarg = iarg + 1;
             crystal = varargin{iarg};
+            
+            switch crystal 
+                
+                case {'olivine','quartz','post-perovskite'}
+                otherwise
+                    error('Crystal type not recognised')
+            end
             
         case 'index'
             iarg = iarg + 1;
@@ -159,6 +168,8 @@ if (wantPlot == 1)
     hold on
     plot(ref_strain,ref_index,'k-');
     plot(strain,index,'rx');
+    xlabel('Strain')
+    ylabel('Index')
 end
 
 

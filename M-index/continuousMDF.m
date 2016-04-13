@@ -1,8 +1,12 @@
 function [ MDF, density, angles] = continuousMDF(input_texture,CS,SS)
 %textureMDF returns the MDF, the angles, and angle desnsities for an input
 %texture
-%   If input texture has more than one timestep (i.e. requires cell array),
-%   then the outputs will also be cell arrays.
+%
+%   Uses functionalilty from the MTEX package to calculate a statisitcal
+%   misorientation angle distribution from an orientation angle
+%   distribution.
+%
+%   MTEX is available from: http://mtex-toolbox.github.io/
 %
 %   Inputs:  input_texture - either VPSC file path, texture cell array or
 %                            single texture.
@@ -13,8 +17,12 @@ function [ MDF, density, angles] = continuousMDF(input_texture,CS,SS)
 %            density       - The angle density (for angles in ANGLES)
 %            angles        - Array of angles (up to max for cystal symmetry)
 %
+%   Lewis Bailey - University of Leeds, School of Earth and Environment 
+%   2015-16 Undergraduate final year project
+%
 %   Usage: [ MDF, density, angles ] = textureMDF(input_texture,CS,SS)
 %
+%   See also: M_INDEXDISC, M_INDEXCONT, DISCRETEMDF
 
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
 setup_env

@@ -1,6 +1,54 @@
 function [ uA, lmA, strain ] = calc_anisotropy(input_texture,n,seed,varargin)
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
+%CALC_ANISOTROPY calculates two anisotropy indices for an input texture
+%   
+%   Takes input texture as either a VPSC or EBSD (*.ctf) file path, or a
+%   cell array/matrix of a Euler angles that has already been read in,
+%   randomly sampling n grains (without replacement).
+%
+%   CALC_ANISOTROPY calculates the universal anisotropy index (uA,
+%   Ranganathan and Ostoja-Starzewski, 2008) and the Ledbetter and Migliori
+%   (2006) index (lmA). If the input is VPSC, then a vector containing the
+%   strain at each timestep is returned.
+%
+%   Uses functionality from the MSAT toolkit (available from
+%   http://github.com/andreww/MSAT)
+%
+%   Inputs:  input_texture - file path/texture array/texture matrix 
+%            n             - number of grains to use
+%            seed          - allows repeatability, i.e. generates the same
+%                            'random' samples if set equal to previous run
+%
+%   Outputs: uA            - Universal anisotropy index
+%            lmA           - Ledbetter and Migliori index
+%            strain        - Strain at each step (VPSC only)
+%
+%   Optional arguments...
+%
+%   'crystal'  - specfies the crystal symmetry to use, must be followed by a
+%                supported crystal symmetry, e.g. 'crystal','quartz'
+%
+%                currently supported symmetries: 'olivine', 'quartz',
+%                'post-perovskite'
+%
+%   'outfile'  - must be followed by a file path indicating where to dump
+%                output text file. Text file includes headers giving meta
+%                data information e.g. no. grains, input file etc.
+%
+%   Lewis Bailey - University of Leeds, School of Earth and Environment 
+%   2015-16 Undergraduate final year project
+%
+%   References
+%
+%   Ledbetter, H. and Migliori, A. (2006). "A general elastic-anisotropy 
+%   measure". Journal of applied physics, 100(6)
+%
+%   Ranganathan, S. I. and Ostoja-Starzewski, M. (2008). "Universal elastic 
+%   anisotropy index". Physical Review Letters, 101(5)
+%
+%   Usage: [ uA, lmA, strain ] = calc_anisotropy(input_texture,n,seed,varargin)
+%
+%   See also: J_INDEX, M_INDEXCONT, M_INDEXDISC, INDEX_REPEAT
+
 
 
 tic;
@@ -65,15 +113,13 @@ if (blocks == 1)  % we only have one strain step
     end 
 
     % the next step is to average the elasticity of each grain:
-
     rhos = ones(nxtls,1)*rho_single; % All crystals have the same density.
     vfs  = ones(nxtls,1);            % Same volume fraction for each point
 
     % normalised by MS_VRH.
-    [C_poly_av, rh_poly_av] = MS_VRH(vfs, Cs, rhos);
+    [C_poly_av, ~] = MS_VRH(vfs, Cs, rhos);
 
     % The question is how anisotropic is C_poly_av. The two most useful measures are given by:
-
     [ uA, lmA ] = MS_anisotropy( C_poly_av );
     
 else  % we have multiple strain steps
@@ -91,15 +137,13 @@ else  % we have multiple strain steps
         end 
 
         % the next step is to average the elasticity of each grain:
-
         rhos = ones(n,1)*rho_single; % All crystals have the same density.
         vfs  = ones(n,1);            % Same volume fraction for each point
 
         % normalised by MS_VRH.
-        [C_poly_av, rh_poly_av] = MS_VRH(vfs, Cs, rhos);
+        [C_poly_av, ~] = MS_VRH(vfs, Cs, rhos);
 
         % The question is how anisotropic is C_poly_av. The two most useful measures are given by:
-
         [ uA(b), lmA(b) ] = MS_anisotropy( C_poly_av );
         
         fprintf('done\n')

@@ -1,5 +1,6 @@
 function [ m, strain ] = m_indexCont(input_texture,n,seed,varargin)
-%M_INDEXCONT returns m index and strain vector for an input texture 
+%M_INDEXCONT returns  continuous M-index and strain vector for an input texture 
+%
 %   Takes either a VPSC file path or a cell array/matrix of a texture that
 %   has already been read in (see read_VPSC). Input can also be an EBSD file
 %   (*.ctf). 
@@ -29,7 +30,7 @@ function [ m, strain ] = m_indexCont(input_texture,n,seed,varargin)
 %   Lewis Bailey - University of Leeds, School of Earth and Environment 
 %   2015-16 Undergraduate final year project
 %
-%   Usage: [ m, strain ] = m_indexCont(input_texture,n,seed)
+%   Usage: [ m, strain ] = m_indexCont(input_texture,n,seed,...)
 %
 %   See also: J_INDEX, M_INDEXDISC, INDEX_REPEAT
 

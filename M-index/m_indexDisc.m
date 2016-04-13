@@ -1,10 +1,13 @@
 function [ m, strain, disor_freq, h ] = m_indexDisc(input_texture,n,seed,varargin)
 %M_INDEXDISC returns discrete M-index and strain vector for an input texture
 %
-%   Takes either a VPSC or EBSD (*.ctf) file path, or a cell array/matrix
-%   of a texture that has already been read in. The M-index is calulated
-%   using the method outlined by Skemer et al (2005). M_INDEXDISC will 
-%   also return a strain vector if the input is a VPSC file.
+%   Takes input texture as either a VPSC or EBSD (*.ctf) file path, 
+%   or a cell array/matrix of a Euler angles that has already been read in, 
+%   randomly sampling n grains (without replacement). 
+%
+%   The M-index is calulated using the method outlined by Skemer et al
+%   (2005). M_INDEXDISC will also return a strain vector if the input is 
+%   a VPSC file, and can plot the misorientation angle distribution.
 %
 %   Inputs:  input_texture - file path/texture array/texture matrix 
 %            n             - number of grains to use
@@ -25,7 +28,7 @@ function [ m, strain, disor_freq, h ] = m_indexDisc(input_texture,n,seed,varargi
 %   'crystal'  - specfies the crystal symmetry to use, must be followed by a
 %                supported crystal symmetry, e.g. 'crystal','quartz'
 %
-%                supported symmetries: 'olivine', 'quartz',
+%                currently supported symmetries: 'olivine', 'quartz',
 %                'post-perovskite'
 %
 %   'bin'      - used to set the bin width, in degrees. Must be followed by

@@ -1,7 +1,8 @@
 function [ textures, strain, blocks, input, output ] = get_inputInfo(input,n,seed,crystal)
 %GET_INPUTINFO Extracts Euler angles and other info from various texture
 %inputs
-%   get_inputInfo will deal with either a VPSC file path, an EBSD (*.ctf)
+%
+%   GET_INPUTINFO will deal with either a VPSC file path, an EBSD (*.ctf)
 %   file path or an previously inputted texture (either cell array or
 %   single matrix). In all cases 
 %
@@ -16,7 +17,12 @@ function [ textures, strain, blocks, input, output ] = get_inputInfo(input,n,see
 %               input    - returns the input string, or 'Matlab matrix'
 %               output   - flag for output type in other functions
 %
+%   Lewis Bailey - University of Leeds, School of Earth and Environment 
+%   2015-16 Undergraduate final year project
+%
 %   Usage: [ textures, strain, blocks, input, output ] = get_inputInfo(input,n,seed,crystal)
+%
+%   See also: SAMPLE_VPSC, SAMPLE_EBSD, SAMPLE_TEXTURE
 
 %%
 

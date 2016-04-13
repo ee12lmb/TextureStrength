@@ -1,5 +1,12 @@
 function [ CS ] = lookupSym(crystal)
 %LOOKUPSYM finds symmetry for a given crystal
+%
+%   Add more definitions here to extend the functionality of the toolbox
+%
+%   Lewis Bailey - University of Leeds, School of Earth and Environment 
+%   2015-16 Undergraduate final year project
+%
+%   See also: GET_INPUTINFO
 
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
 setup_env;

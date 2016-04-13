@@ -1,7 +1,8 @@
 function [ data, type, header ] = read_texout(file)
 %READ_TEXOUT Reads in data from output of an index calculation
+%
 %   Data files outputted by j_index, m_indexCont, m_indexDisc and
-%   index_repeat can be read in using read_texout. Header information is
+%   index_repeat can be read in using READ_TEXOUT. Header information is
 %   also extracted from these files.
 %
 %   Inputs:     file   - file outputted from other texture function
@@ -15,8 +16,13 @@ function [ data, type, header ] = read_texout(file)
 %                        m_indexDisc with two columns (strain | index)
 %
 %               header - meta data extracted from data file
+%
+%   Lewis Bailey - University of Leeds, School of Earth and Environment 
+%   2015-16 Undergraduate final year project
 %                    
 %   Usage: [ data, type, header ] = read_texout(file)
+%
+%   See also: J_INDEX, M_INDEXDISC, M_INDEXCONT, INDEXT_REPEAT
 
 %% setup environment
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/

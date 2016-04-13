@@ -1,26 +1,27 @@
 function [ theta, M, theta_max ] = discreteMDF(input_texture,crystal)
 %DISCRETEMDF calculates misorientation angles for all grains in
 %input_texture
+%
 %   Takes either VPSC file path or texture cell array/matrix (depending on
 %   how many timesteps there are). Misorientation matricies for every
 %   combination of grains are calculated and the associated angle.
 %
 %   Inputs:  input_texture - either VPSC file path or texture array/matrix
 %                            of euler angles
+%            crystal       - string containing crystal name to define 
+%                            symmetry
 %
 %   Outputs: theta         - angles of misorientation between all grains
 %            M             - misorientation matricies for all grains 
-%            theta_max     - max theoretical angle for this symmetry 
+%            theta_max     - max theoretical angle for this symmetry
 %
-%   Usage: [ theta, misor, theta_max ] = discreteMDF(input_texture,CS)
+%   Lewis Bailey - University of Leeds, School of Earth and Environment 
+%   2015-16 Undergraduate final year project
+%
+%   Usage: [ theta, misor, theta_max ] = discreteMDF(input_texture,crystal)
+%
+%   See also: CALCDISORIENTATION, M_INDEXDISC
 
-
-% % set up MTEX package
-% addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/mtex-4.1.3/
-% startup_mtex;
-% 
-% % add path to read files
-% addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles/
 
 addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/
 setup_env

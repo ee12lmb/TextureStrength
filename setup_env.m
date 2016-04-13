@@ -14,18 +14,29 @@ if (ENVIRONMENT_SET == 1) % environment is already set up
     return
 end
 
+fprintf('\nStarting up texture strength toolbox...\n')
+fprintf('-----------------------------------------------------------\n')
+fprintf('Lewis Bailey 2015-16 Undergraduate final year project\n\n')
+   
+
+fprintf('Initialising MTEX package...\n')
 % add path and initialise MTEX package
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/mtex-4.1.3/
+addpath ../mtex-4.1.3/
 startup_mtex
 
+fprintf('Adding path to MSAT package...\n')
 % add path to MSAT
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/msat-1.1.1/msat
+addpath ../msat-1.1.1/msat
 
+fprintf('Adding path to toolbox functions...\n\n')
 % add paths to function folders
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/J-index
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/M-index
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/readfiles
-addpath /nfs/see-fs-01_teaching/ee12lmb/project/source/dev/analysis
+addpath ./J-index
+addpath ./M-index
+addpath ./readfiles
+addpath ./analysis
+
+% list available functions
+help toolbox_functions
 
 % set global variable for other functions to see
 ENVIRONMENT_SET = 1;
