@@ -45,4 +45,8 @@ location as the MTEX and MSAT directories e.g:
 
 3) Open Matlab and add the TextureStrength directory to the path
 
-4) Run the script startup_env 
+4) Run the script setup_env
+
+(If issues are encountered, or a different directory structure is 
+required, then edit setup_env so that the paths added are absolute
+as opposed to relative) 
