@@ -8,7 +8,7 @@ This Matlab toolbox was created as part of a final year
 undergraduate project in accordance with the requirements 
 of BSc Geophysical Sciences (Industrial).
 
-----------  TEXTURE STRENGTH TOOLBOX ----------------
+-------------- TEXTURE STRENGTH TOOLBOX ----------------
 
 This set of Matlab functions allows simple calculation of a
 number of measures of texture strength, as well as additional,
@@ -36,7 +36,7 @@ TO SETUP:
 
 and place them in the same directory.
 
-2) Download this toolbox and place the directory in the same
+2) Download this toolbox, unzip and place the directory in the same
 location as the MTEX and MSAT directories e.g:
 
 ~ $ ls
