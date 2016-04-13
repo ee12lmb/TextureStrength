@@ -1,0 +1,48 @@
+
+SOURCE CODE: TextureStrength toolbox
+-------------------------------------------------
+Lewis Bailey
+April 2016
+
+This Matlab toolbox was created as part of a final year
+undergraduate project in accordance with the requirements 
+of BSc Geophysical Sciences (Industrial).
+
+----------  TEXTURE STRENGTH TOOLBOX ----------------
+
+This set of Matlab functions allows simple calculation of a
+number of measures of texture strength, as well as additional,
+related functionality. These measures can be calculated from 
+VPSC or EBSD (*.ctf) format. 
+
+Extensive documentation is included within the functions, 
+which can be accessed using help [ function ] within Matlab.
+
+General structure:
+
+READFILES - functions to read in/sample data
+J_INDEX   - function to calculate the J-index
+M_INDEX	  - functions to calculate discrete and continuous M-index
+ANALYSIS  - functions to allow further analysis and additional functionality
+
+-----------------------------------------------------
+
+TO SETUP:
+
+1) Install the MTEX and MSAT packages:
+
+  MTEX: http://mtex-toolbox.github.io/
+  MSAT: http://github.com/andreww/MSAT 
+
+and place them in the same directory.
+
+2) Download this toolbox and place the directory in the same
+location as the MTEX and MSAT directories e.g:
+
+~ $ ls
+   mtex-4.3.1   msat-1.1.1   TextureStrength
+~ $ _
+
+3) Open Matlab and add the TextureStrength directory to the path
+
+4) Run the script startup_env 
