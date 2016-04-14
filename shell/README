@@ -1,0 +1,21 @@
+SHELL
+------------------------------------------------------------
+Contains useful shell scripts for running index calculations 
+from the command line.
+
+Paths to certain functions will have to be modified for these 
+to work when downloaded to new file system. See the comments 
+inside the scripts for details.
+
+run_* - these functions run the relevant indices. They can 
+        run from a list of command line arguments or by
+        prompting the user for input. To run interactively 
+        type "run_* help"
+
+tinfo - will display header info for a datafile output by
+        one of the index functions, or information about 
+        a raw VPSC file.
+
+textr - can extract strain steps from a VPSC file, skipping 
+        a user defined number. This is useful when the VPSC
+        files have many steps but only a few are needed.

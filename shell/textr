@@ -1,0 +1,68 @@
+#!/bin/bash
+echo
+# script will extract strain steps from VPSC
+# file, skipping a specified number
+
+infile=$1
+
+
+echo "Extracting info from $infile"
+# extract info about texture file
+nlines=$(wc -l $infile | awk '{print $1}')
+ngrains=$(grep B $infile | head -n1 | awk '{print $2}')
+ssize=$((ngrains + 4))
+nsteps=$(grep STRAIN $infile | wc -l | awk '{print $1}')
+
+echo "Total lines: $nlines"
+echo "No. grains:  $ngrains"
+echo "Step size:   $ssize" 
+echo "No. steps:   $nsteps"
+echo
+printf "Starting strain step........ "
+read begin
+printf "End strain step............. "
+read end
+printf "How many steps to skip?..... "
+read skip
+echo
+echo "Extracting textures:"
+echo
+
+# if output file exists remove it
+fname=${infile%.*}
+outfile="${fname}_EXTR_${begin}-${skip}-${end}.OUT"
+if [[ -f $outfile ]]
+then
+  printf "Output file exists, overwrite? [y/n] : "
+  read ans
+
+  case $ans in
+    y|Y|yes|Yes) rm -f $outfile 
+                 ;;
+      n|N|no|No) echo "Exiting..." 
+                 exit 0
+                 ;;
+  esac
+fi
+
+for ((i=$((begin -1)); i<=$end; i++))
+do
+
+  # we have reached the next step to extract
+  if [[ $((i % skip)) -eq 0 ]] 
+  then
+    step_start=$((i * $ssize + 1))
+    step_end=$(( $step_start + $ssize - 1))
+
+    echo "Extracting step: $((i + 1)) (lines $step_start - $step_end): Strain $(awk -v start="$step_start" 'NR==start {print $5}' $infile)"
+    awk -v start="$step_start" -v end="$step_end" 'NR>=start && NR<=end' $infile >> $outfile
+
+  else
+    continue
+  fi
+done
+echo "Done."
+echo
+echo "Output file: '$outfile'"
+echo
+exit 0

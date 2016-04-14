@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# script will display headers for output texture file
+function usage()
+{
+  echo "Usage: tinfo [ output texture file(s) ]"
+}
+
+[[ $# -lt 1 ]] && usage && exit 0 
+echo
+
+for file in $@
+do
+
+  [[ ! -f $file ]] && echo "$file is a directory" && continue
+
+  case $file in
+    *.out) # file is a function output
+        echo "===================================================="
+        echo "$file"
+        echo "----------------------------------------------------"
+        grep + $file 
+        echo "===================================================="
+        echo
+        ;;
+    *.OUT)
+        # need to extract info
+        ngrains=$(grep B $file | head -n1 | awk '{print $2}')
+        nsteps=$(grep STRAIN $file | wc -l)
+        ((nsteps--))
+
+        echo "===================================================="
+        echo "$file"
+        echo "----------------------------------------------------"
+        printf "Input is a VPSC output file...\n"
+        printf "Grains:\t$ngrains\n"
+        printf "Steps:\t$nsteps\n"
+        echo "-----------------------STRAIN-----------------------"
+       
+        i=1
+        for strain in $(grep STRAIN $file | awk '{print $5}')
+        do
+          if [[ $((i % 7)) -eq 0 ]]
+          then 
+            printf "$strain\n"
+          else
+            printf "$strain "
+          fi
+        ((i++))
+        done 
+        printf "\n===================================================="
+        echo
+        ;;
+  esac
+done
+exit 0
