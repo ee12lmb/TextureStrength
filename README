@@ -24,6 +24,7 @@ READFILES - functions to read in/sample data
 J_INDEX   - function to calculate the J-index
 M_INDEX	  - functions to calculate discrete and continuous M-index
 ANALYSIS  - functions to allow further analysis and additional functionality
+SHELL     - some useful shell scripts to use with the toolbox (e.g. run from command line
 
 -----------------------------------------------------
 
